@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-30T11:34:00-04:00",
+ "asOf": "2026-10-30T16:32:58.978Z",
  "items": [
   {
    "id": "nvda-openai-100b-loi",
@@ -416,10 +416,10 @@
    "title": "Microsoft contracts Nscale for ~200,000 Nvidia GPUs",
    "date": "2025-10-15",
    "status": "active",
-   "update": "In April 2026 Microsoft took over OpenAI's planned Stargate Norway capacity at Nscale and added more than 30,000 Vera Rubin GPUs.",
-   "updated": "2026-04-15",
-   "source": "https://www.techzine.eu/news/infrastructure/135498/nscale-signs-mega-contract-with-microsoft-for-ai-data-centers/",
-   "sourceName": "Techzine / CNBC / FT"
+   "update": "Microsoft pulled out of anchoring Nscale's Loughton, UK site after grid power slipped to the 2030s; Nscale says other contracts are unaffected.",
+   "updated": "2026-10-19",
+   "source": "https://www.datacenterdynamics.com/en/news/microsoft-pulls-out-of-delayed-nscale-data-center-in-loughton-essex/",
+   "sourceName": "DatacenterDynamics"
   },
   {
    "id": "openai-nscale-stargate-europe",
@@ -1005,6 +1005,66 @@
    "updated": "2025-10-16",
    "source": "https://www.implicator.ai/oracle-locks-65-billion-in-cloud-deals-as-meta-joins-the-pile.md",
    "sourceName": "Implicator"
+  },
+  {
+   "id": "nvda-meta-3b-equity",
+   "from": "nvda",
+   "to": "meta",
+   "type": "investment",
+   "amount": 3000000000,
+   "amountLabel": "$3B",
+   "title": "Nvidia buys $3B of Meta's stock offering",
+   "date": "2026-10-27",
+   "status": "announced",
+   "update": "Nvidia said it will buy $3B of Meta's stock sale, alongside wider work on Meta's Muse AI models and Nvidia hardware.",
+   "updated": "2026-10-27",
+   "source": "https://finance.yahoo.com/markets/article/nvidia-to-invest-3-billion-in-meta-expand-partnership-on-muse-125249944.html",
+   "sourceName": "Yahoo Finance"
+  },
+  {
+   "id": "anthropic-nscale-45b",
+   "from": "anthropic",
+   "to": "nscale",
+   "type": "services",
+   "amount": 45000000000,
+   "amountLabel": "about $45B over 6 years",
+   "title": "Anthropic rents about $45B of compute from Nscale",
+   "date": "2026-08-26",
+   "status": "active",
+   "update": "Capacity from Nscale's West Virginia campus is due late 2027; a second deal of similar size is reportedly in talks.",
+   "updated": "2026-10-30",
+   "source": "https://techcrunch.com/2026/08/26/anthropic-continues-compute-gobbling-streak-in-45-billion-deal-with-nscale/",
+   "sourceName": "TechCrunch"
+  },
+  {
+   "id": "amd-anthropic-5b",
+   "from": "amd",
+   "to": "anthropic",
+   "type": "investment",
+   "amount": 5000000000,
+   "amountLabel": "up to $5B",
+   "title": "AMD commits up to $5B equity investment in Anthropic",
+   "date": "2026-07-22",
+   "status": "announced",
+   "update": "AMD's investment is conditional on milestones and is expected to be paid out through fiscal 2028.",
+   "updated": "2026-07-22",
+   "source": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+   "sourceName": "AMD"
+  },
+  {
+   "id": "anthropic-amd-2gw",
+   "from": "anthropic",
+   "to": "amd",
+   "type": "hardware",
+   "amount": null,
+   "amountLabel": "2GW of MI450 GPUs (tens of billions)",
+   "title": "Anthropic to deploy up to 2GW of AMD MI450 chips",
+   "date": "2026-07-22",
+   "status": "active",
+   "update": "The first gigawatt is due to start in the first half of 2027.",
+   "updated": "2026-07-22",
+   "source": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+   "sourceName": "AMD"
   }
  ]
 }

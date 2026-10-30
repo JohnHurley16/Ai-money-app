@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-30T11:34:00-04:00",
+ "asOf": "2026-10-30T16:32:58.978Z",
  "items": [
   {
    "id": "chips-slide-oct30",
@@ -99,6 +99,24 @@
    "sourceName": "Fortune"
   },
   {
+   "id": "nvda-nscale-guarantee-talks",
+   "date": "2026-10-29",
+   "title": "Nvidia in talks to back Nscale's debt for Anthropic site",
+   "what": "Nvidia may co-sign billions of Nscale borrowing for a West Virginia campus Anthropic plans to use; nothing is signed yet.",
+   "players": [
+    "nvda",
+    "nscale",
+    "anthropic",
+    "lenders"
+   ],
+   "kind": "debt",
+   "dir": "neutral",
+   "amount": null,
+   "amountLabel": "billions in guarantees",
+   "source": "https://finance.yahoo.com/technology/ai/articles/nvidia-weighs-billions-guarantees-nscale-130018460.html",
+   "sourceName": "Yahoo Finance"
+  },
+  {
    "id": "alphabet-q3-results",
    "date": "2026-10-28",
    "title": "Google Cloud doubles, but AI spending turns cash flow negative",
@@ -144,6 +162,22 @@
    "amountLabel": "$45.2B capex vs $50.7B expected",
    "source": "https://stocktwits.com/news-articles/markets/equity/crwv-nbis-iren-apld-stocks-drop-after-microsoft-capex-falls-short-on-delayed-third-party-capacity/cZUQeHWR9bT",
    "sourceName": "Stocktwits"
+  },
+  {
+   "id": "nvda-meta-3b-stock",
+   "date": "2026-10-27",
+   "title": "Nvidia puts $3B into Meta's new stock sale",
+   "what": "A chip supplier is now buying a slice of its customer, sending fresh equity money from Nvidia to Meta.",
+   "players": [
+    "nvda",
+    "meta"
+   ],
+   "kind": "deal",
+   "dir": "up",
+   "amount": 3000000000,
+   "amountLabel": "$3B stock purchase",
+   "source": "https://finance.yahoo.com/markets/article/nvidia-to-invest-3-billion-in-meta-expand-partnership-on-muse-125249944.html",
+   "sourceName": "Yahoo Finance"
   },
   {
    "id": "meta-95b-stock-sale",
@@ -259,6 +293,21 @@
    "amountLabel": "-50% from June peak",
    "source": "https://www.thewealthadvisor.com/article/masayoshi-sons-ai-empire-just-lost-half-its-market-value-debt-becoming-story",
    "sourceName": "The Wealth Advisor"
+  },
+  {
+   "id": "openai-30b-round-near",
+   "date": "2026-10-22",
+   "title": "OpenAI nears $30B raise at $1.25T value",
+   "what": "OpenAI wants signed commitments within about a week for a bridge round before a likely 2027 IPO, led by UAE investors and Coatue.",
+   "players": [
+    "openai"
+   ],
+   "kind": "deal",
+   "dir": "up",
+   "amount": 30000000000,
+   "amountLabel": "up to $30B round",
+   "source": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+   "sourceName": "CNBC"
   },
   {
    "id": "meta-q3-cash-outflow",
