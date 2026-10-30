@@ -1,0 +1,522 @@
+{
+ "asOf": "2026-10-30T11:34:00-04:00",
+ "items": [
+  {
+   "id": "chips-slide-oct30",
+   "date": "2026-10-30T10:00-04:00",
+   "title": "Chip stocks tumble after Intel and Amazon results",
+   "what": "Chipmakers from AMD to Micron, Broadcom and Nvidia sold off as Intel's and Amazon's results soured the mood on AI hardware.",
+   "players": [
+    "amd",
+    "mu",
+    "avgo",
+    "nvda"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "AMD -8.5%, Nvidia -2.7%",
+   "source": "https://www.stocktitan.net/articles/stock-market-today-live-october-30-2026",
+   "sourceName": "StockTitan"
+  },
+  {
+   "id": "nasdaq-slides-oct30",
+   "date": "2026-10-30T09:53-04:00",
+   "title": "Nasdaq drops over 2% to a near three-month low",
+   "what": "Amazon and Intel deepened fears that AI building costs won't pay off soon; big tech stocks are on track to lose $2T+ in October.",
+   "players": [
+    "amzn",
+    "intc",
+    "nvda",
+    "amd"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": -2000000000000,
+   "amountLabel": "-$2T+ in October (Nasdaq-100)",
+   "source": "https://lufkindailynews.com/news_reuters/business/nasdaq-hits-near-three-month-low-as-amazon-intel-deepen-ai-capex-concerns/article_a9360e82-0465-596a-aa41-c475ee3d1699.html",
+   "sourceName": "Reuters (via Lufkin Daily News)"
+  },
+  {
+   "id": "intel-record-plunge",
+   "date": "2026-10-30T09:53-04:00",
+   "title": "Intel crashes about 30%, heading for its worst day ever",
+   "what": "Intel warned of weak PC demand, factory setbacks and burning cash this year, so investors dumped the stock.",
+   "players": [
+    "intc"
+   ],
+   "kind": "earnings",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "~-30% in one day",
+   "source": "https://lufkindailynews.com/news_reuters/business/nasdaq-hits-near-three-month-low-as-amazon-intel-deepen-ai-capex-concerns/article_a9360e82-0465-596a-aa41-c475ee3d1699.html",
+   "sourceName": "Reuters (via Lufkin Daily News)"
+  },
+  {
+   "id": "amazon-q3-cash-burn",
+   "date": "2026-10-29",
+   "title": "Amazon's AI spending pushes its yearly cash flow to -$42B",
+   "what": "AWS cloud sales grew 39%, but data-center spending was so heavy that Amazon spent $42B more cash than it took in over a year.",
+   "players": [
+    "amzn"
+   ],
+   "kind": "earnings",
+   "dir": "down",
+   "amount": -42400000000,
+   "amountLabel": "-$42.4B free cash flow (12 mo)",
+   "source": "https://www.sec.gov/Archives/edgar/data/0001018724/000101872426000038/amzn-20260930xex991.htm",
+   "sourceName": "Amazon (SEC filing)"
+  },
+  {
+   "id": "msft-25b-bond",
+   "date": "2026-10-29",
+   "title": "Microsoft borrows $25 billion in a giant bond sale",
+   "what": "Even cash-rich Microsoft is borrowing $25B from bond investors, adding to Big Tech's fast-growing debt as AI spending climbs.",
+   "players": [
+    "msft",
+    "lenders"
+   ],
+   "kind": "debt",
+   "dir": "neutral",
+   "amount": 25000000000,
+   "amountLabel": "$25B bond",
+   "source": "https://news.microsoft.com/source/2026/10/29/microsoft-announces-debt-offerings-7/",
+   "sourceName": "Microsoft"
+  },
+  {
+   "id": "alphabet-worst-day",
+   "date": "2026-10-29",
+   "title": "Alphabet has its worst day ever, losing ~$482B",
+   "what": "Google's stock fell 12.6% after search growth slowed and AI spending drained cash, erasing about $482B of value in one day.",
+   "players": [
+    "googl"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": -482000000000,
+   "amountLabel": "-$482B value",
+   "source": "https://fortune.com/2026/10/29/alphabet-worst-day-google-search-valuation-energy-sector-bofa/",
+   "sourceName": "Fortune"
+  },
+  {
+   "id": "alphabet-q3-results",
+   "date": "2026-10-28",
+   "title": "Google Cloud doubles, but AI spending turns cash flow negative",
+   "what": "Google Cloud sales jumped 103%, yet $51B of quarterly data-center spending left Alphabet $9.1B short on cash.",
+   "players": [
+    "googl"
+   ],
+   "kind": "earnings",
+   "dir": "down",
+   "amount": -9100000000,
+   "amountLabel": "-$9.1B free cash flow",
+   "source": "https://www.xtb.com/en/market-analysis/alphabet-disappoints-wall-street-despite-record-results-shares-plunge-over-8-and-test-300",
+   "sourceName": "XTB"
+  },
+  {
+   "id": "msft-q1-azure",
+   "date": "2026-10-28",
+   "title": "Microsoft's Azure cloud grows 48%, beating forecasts",
+   "what": "Strong demand for Microsoft's AI cloud lifted quarterly sales to $92B, a sign big customers are still paying up for AI.",
+   "players": [
+    "msft"
+   ],
+   "kind": "earnings",
+   "dir": "up",
+   "amount": 92280000000,
+   "amountLabel": "$92.3B revenue",
+   "source": "https://www.xtb.com/en/market-analysis/microsoft-results-cloud-growth-overshadows-capex-questions",
+   "sourceName": "XTB"
+  },
+  {
+   "id": "msft-capex-delays",
+   "date": "2026-10-28",
+   "title": "Microsoft spends less than planned as outside capacity arrives late",
+   "what": "Delayed deliveries kept Microsoft's AI spending at $45B versus $51B expected, and chip-renters like CoreWeave and Nebius fell about 6%.",
+   "players": [
+    "msft",
+    "crwv",
+    "nbis"
+   ],
+   "kind": "news",
+   "dir": "down",
+   "amount": 45200000000,
+   "amountLabel": "$45.2B capex vs $50.7B expected",
+   "source": "https://stocktwits.com/news-articles/markets/equity/crwv-nbis-iren-apld-stocks-drop-after-microsoft-capex-falls-short-on-delayed-third-party-capacity/cZUQeHWR9bT",
+   "sourceName": "Stocktwits"
+  },
+  {
+   "id": "meta-95b-stock-sale",
+   "date": "2026-10-26",
+   "title": "Meta plans to sell up to $95B of new stock for AI",
+   "what": "Meta will sell $35B of new shares now and up to $60B more from 2027 to pay for AI data centers, diluting current owners.",
+   "players": [
+    "meta"
+   ],
+   "kind": "deal",
+   "dir": "down",
+   "amount": 95000000000,
+   "amountLabel": "Up to $95B stock sales",
+   "source": "https://www.nbcpalmsprings.com/business-finance-and-tech/2026/10/26/meta-plans-up-to-95-billion-in-stock-sales-to-fund-ai-expansion",
+   "sourceName": "NBC Palm Springs"
+  },
+  {
+   "id": "anthropic-ipo-filing",
+   "date": "2026-10-26",
+   "title": "Anthropic files to go public on Nasdaq as 'ANT'",
+   "what": "Anthropic's filing shows $16.3B of first-half sales, about 14 times a year earlier, opening a top AI lab to public investors.",
+   "players": [
+    "anthropic"
+   ],
+   "kind": "ipo",
+   "dir": "up",
+   "amount": 16290000000,
+   "amountLabel": "$16.3B H1 revenue",
+   "source": "https://www.xtb.com/en/market-analysis/anthropic-files-prospectus-ahead-of-ipo-with-ant-ticker-on-nasdaq-the-launch-date-and-price-remain-a-mystery",
+   "sourceName": "XTB"
+  },
+  {
+   "id": "spacex-40b-gpu-lease",
+   "date": "2026-10-26",
+   "title": "SpaceX lines up a $40B deal to lease Nvidia chips",
+   "what": "Apollo would buy Nvidia's newest AI chips and rent them to SpaceX for about five years, a giant order landing in 2027.",
+   "players": [
+    "xai",
+    "nvda",
+    "lenders"
+   ],
+   "kind": "debt",
+   "dir": "up",
+   "amount": 40000000000,
+   "amountLabel": "$40B GPU lease",
+   "source": "https://kuwaittimes.com/article/52491/business/spacex-strikes-ai-chip-lease-deal-as-musk-warns-rivals/amp",
+   "sourceName": "Kuwait Times"
+  },
+  {
+   "id": "neoclouds-slide-oct26",
+   "date": "2026-10-26",
+   "title": "AI chip-renters CoreWeave and Nebius are down 30%+ this month",
+   "what": "After Musk's warning these rental firms fell again, and their bonds hit record lows as lenders grew more nervous.",
+   "players": [
+    "crwv",
+    "nbis",
+    "lenders"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "-30%+ in October",
+   "source": "https://www.thestar.com.my/tech/tech-news/2026/10/27/musk039s-grim-outlook-hits-neoclouds-as-debt-concerns-mount",
+   "sourceName": "The Star (Reuters)"
+  },
+  {
+   "id": "musk-neocloud-warning",
+   "date": "2026-10-25",
+   "title": "Musk warns 200+ AI cloud startups could fail as lending dries up",
+   "what": "Musk said lenders have nearly stopped funding AI chip-rental firms without other income, so most will fail or be merged.",
+   "players": [
+    "xai",
+    "crwv",
+    "nbis",
+    "lenders"
+   ],
+   "kind": "news",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "200+ firms at risk",
+   "source": "https://www.businesstoday.in/technology/news/story/elon-musk-warns-over-200-ai-cloud-firms-could-fail-as-credit-tightens-says-only-a-few-may-survive-563571-2026-10-26",
+   "sourceName": "Business Today"
+  },
+  {
+   "id": "nasdaq-drop-oct22",
+   "date": "2026-10-22",
+   "title": "Nasdaq falls 2.6%, its worst day since June, as Meta sinks",
+   "what": "Meta lost 7% and chip stocks dropped nearly 7% as investors doubted how much more AI spending can pay off.",
+   "players": [
+    "meta",
+    "intc",
+    "amd"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "Nasdaq -2.6%",
+   "source": "https://www.staradvertiser.com/2026/10/22/breaking-news/nasdaq-plunges-2-6-as-ai-spending-fears-spark-tech-selloff/",
+   "sourceName": "Honolulu Star-Advertiser (AP)"
+  },
+  {
+   "id": "softbank-half-value",
+   "date": "2026-10-22",
+   "title": "SoftBank has now lost half its value since June",
+   "what": "Big OpenAI backer SoftBank fell another 6.9% on AI debt fears, and the cost of insuring its debt hit a near four-year high.",
+   "players": [
+    "softbank",
+    "openai"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "-50% from June peak",
+   "source": "https://www.thewealthadvisor.com/article/masayoshi-sons-ai-empire-just-lost-half-its-market-value-debt-becoming-story",
+   "sourceName": "The Wealth Advisor"
+  },
+  {
+   "id": "meta-q3-cash-outflow",
+   "date": "2026-10-21",
+   "title": "Meta burns cash for the first time since 2012",
+   "what": "Meta poured $35B into AI building in one quarter, more than its business brought in, leaving it about $2B short.",
+   "players": [
+    "meta"
+   ],
+   "kind": "earnings",
+   "dir": "down",
+   "amount": -2120000000,
+   "amountLabel": "-$2.1B free cash flow",
+   "source": "https://www.kucoin.com/news/flash/meta-reports-negative-free-cash-flow-for-first-time-since-2012",
+   "sourceName": "KuCoin News"
+  },
+  {
+   "id": "spacex-q3-ai-boom",
+   "date": "2026-10-20",
+   "title": "SpaceX sales jump 161% as its AI business booms",
+   "what": "Renting AI computing power to Anthropic and Google helped SpaceX grow revenue to $14.6B and swing to a $4.4B profit.",
+   "players": [
+    "xai",
+    "anthropic",
+    "googl"
+   ],
+   "kind": "earnings",
+   "dir": "up",
+   "amount": 14580000000,
+   "amountLabel": "$14.6B quarterly revenue",
+   "source": "https://www.khaleejtimes.com/business/spacex-quarterly-revenue-jumps-beats-estimates-as-ai-business-surges-2",
+   "sourceName": "Khaleej Times (Reuters)"
+  },
+  {
+   "id": "nasdaq-worst-week",
+   "date": "2026-10-16",
+   "title": "Nasdaq has its worst week since June on AI debt fears",
+   "what": "Worry that AI firms borrowed too much hit tech stocks; CoreWeave lost a quarter of its value in a single week.",
+   "players": [
+    "crwv"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "Nasdaq -4.5% for the week",
+   "source": "https://krdo.com/money/cnn-business-consumer/2026/10/16/nasdaq-sinks-more-than-2-as-investors-raise-questions-about-ai-debt/",
+   "sourceName": "CNN (via KRDO)"
+  },
+  {
+   "id": "chip-losing-streak",
+   "date": "2026-10-16",
+   "title": "Chip stocks fall eight days straight, longest streak since 2008",
+   "what": "Micron, AMD, Broadcom and Intel each dropped about 5% Friday as investors pulled money out of AI hardware bets.",
+   "players": [
+    "mu",
+    "amd",
+    "avgo",
+    "intc"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "8 straight down days",
+   "source": "https://news.ifyouspent.com/en/news/october-2026-ai-chip-selloff-explained",
+   "sourceName": "IfYouSpent"
+  },
+  {
+   "id": "huang-backs-coreweave",
+   "date": "2026-10-15",
+   "title": "Nvidia's Huang defends CoreWeave and its stock bounces 5.9%",
+   "what": "Nvidia's CEO said CoreWeave gets stronger daily and its borrowing costs are falling, briefly calming fears about its debt.",
+   "players": [
+    "nvda",
+    "crwv"
+   ],
+   "kind": "news",
+   "dir": "up",
+   "amount": null,
+   "amountLabel": "CoreWeave +5.9%",
+   "source": "https://news.bgov.com/artificial-intelligence/nvidia-ceo-huang-says-coreweave-improving-no-backstop-needed",
+   "sourceName": "Bloomberg (via BGOV)"
+  },
+  {
+   "id": "gartner-neocloud-warning",
+   "date": "2026-10-15",
+   "title": "Gartner: most AI cloud renters won't survive on their own",
+   "what": "Gartner expects AI data-center revenue to lag building costs, so 80% of chip-rental firms may lose independence by 2030.",
+   "players": [
+    "crwv",
+    "nbis"
+   ],
+   "kind": "news",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "80% of neoclouds",
+   "source": "https://247wallst.com/investing/2026/10/15/ai-cloud-stocks-sink-as-gartner-warns-most-neoclouds-wont-survive-independently-iren-and-coreweave-fall-5-nebius-drops-4/",
+   "sourceName": "24/7 Wall St."
+  },
+  {
+   "id": "ai-default-insurance-record",
+   "date": "2026-10-15",
+   "title": "Cost of insuring against AI company defaults hits records",
+   "what": "Markets now imply roughly a 63% chance CoreWeave defaults within five years; protection on Oracle, SoftBank and Big Tech debt also rose.",
+   "players": [
+    "crwv",
+    "orcl",
+    "softbank",
+    "amzn",
+    "googl",
+    "meta",
+    "nvda",
+    "lenders"
+   ],
+   "kind": "debt",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "~63% implied default odds (CoreWeave)",
+   "source": "https://www.businessday.co.za/world/international-companies/2026-10-15-ai-credit-fears-push-tech-default-insurance-to-record-highs/",
+   "sourceName": "BusinessDay (Reuters)"
+  },
+  {
+   "id": "tsmc-q3-profit",
+   "date": "2026-10-15",
+   "title": "TSMC's profit jumps 69% as chip orders keep pouring in",
+   "what": "TSMC took in $46.7B last quarter and forecast more for next quarter, a sign demand for its most advanced chips is still strong.",
+   "players": [
+    "tsm"
+   ],
+   "kind": "earnings",
+   "dir": "up",
+   "amount": 46720000000,
+   "amountLabel": "$46.7B quarterly revenue",
+   "source": "https://pr.tsmc.com/english/news/3346",
+   "sourceName": "TSMC"
+  },
+  {
+   "id": "coreweave-bonds-distress",
+   "date": "2026-10-14",
+   "title": "CoreWeave's bonds trade at distress levels, near 15% yields",
+   "what": "Bond investors now demand about 15% a year to hold CoreWeave's debt, showing doubt it can comfortably repay; its stock fell 16%.",
+   "players": [
+    "crwv",
+    "lenders"
+   ],
+   "kind": "debt",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "~15% bond yield",
+   "source": "https://investinglive.com/stocks/coreweave-bonds-trade-like-distressed-debt-as-ai-spending-outpaces-balance-sheets/",
+   "sourceName": "investingLive"
+  },
+  {
+   "id": "oracle-ai-debt-drop",
+   "date": "2026-10-14",
+   "title": "Oracle sinks 9% as AI borrowing fears spread",
+   "what": "Oracle borrowed heavily to build data centers, so CoreWeave's bond scare dragged it down along with Dell, AMD and smaller AI clouds.",
+   "players": [
+    "orcl",
+    "crwv",
+    "amd"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "Oracle -8.8%",
+   "source": "https://siliconangle.com/2026/10/14/shares-of-oracle-neoclouds-drop-on-coreweave-debt-concerns/",
+   "sourceName": "SiliconANGLE"
+  },
+  {
+   "id": "hot-inflation-oct14",
+   "date": "2026-10-14",
+   "title": "Hot inflation report raises odds of interest-rate hikes",
+   "what": "Prices rose 3.7% from a year ago, so borrowing may get pricier, bad news for AI firms paying for data centers with debt.",
+   "players": [
+    "lenders"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "3.7% yearly inflation",
+   "source": "https://virginiabusiness.com/us-consumer-price-index-september-rate-hike-bets/",
+   "sourceName": "Virginia Business"
+  },
+  {
+   "id": "anthropic-q3-revenue",
+   "date": "2026-10-14",
+   "title": "Anthropic's quarterly revenue hits $16.8B, and it turns a profit",
+   "what": "Anthropic told investors sales jumped to $16.8B last quarter with a profit, rare proof that an AI lab can make money.",
+   "players": [
+    "anthropic"
+   ],
+   "kind": "news",
+   "dir": "up",
+   "amount": 16800000000,
+   "amountLabel": "$16.8B quarterly revenue",
+   "source": "https://www.thestar.com.my/tech/tech-news/2026/10/15/anthropic-revenue-jumps-to-168-billion-in-third-quarter-ft-reports",
+   "sourceName": "The Star (Reuters)"
+  },
+  {
+   "id": "broadcom-casino-warning",
+   "date": "2026-10-12",
+   "title": "Broadcom's CEO compares AI investors to casino gamblers",
+   "what": "Though Broadcom expects AI chip sales to reach $230B by 2028, its CEO warned that access to money could become AI's biggest limit.",
+   "players": [
+    "avgo",
+    "openai",
+    "anthropic"
+   ],
+   "kind": "news",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "$230B AI chip goal (FY2028)",
+   "source": "https://investinglive.com/stocks/broadcom-ceo-likens-ai-boom-to-a-casino-even-as-he-targets-230-billion-in-chip-sales/",
+   "sourceName": "investingLive"
+  },
+  {
+   "id": "openai-revenue-50b",
+   "date": "2026-10-08",
+   "title": "OpenAI's sales pace is about $50B a year, below earlier reports",
+   "what": "OpenAI's yearly revenue pace is near $50B, not the nearly $70B reported weeks earlier, once counted more like Anthropic's.",
+   "players": [
+    "openai"
+   ],
+   "kind": "news",
+   "dir": "down",
+   "amount": 50000000000,
+   "amountLabel": "~$50B annual revenue pace",
+   "source": "https://news.bgov.com/artificial-intelligence/openais-annualized-revenue-nears-50-billion-ft-says",
+   "sourceName": "Bloomberg Law"
+  },
+  {
+   "id": "nasdaq-record-oct6",
+   "date": "2026-10-06",
+   "title": "Nasdaq closes at a record high before October's slide",
+   "what": "Tech stocks peaked with the Nasdaq near 27,600; AI debt and spending worries erased about 6% within three weeks.",
+   "players": [],
+   "kind": "market",
+   "dir": "up",
+   "amount": null,
+   "amountLabel": "Record 27,599.79",
+   "source": "https://news.ifyouspent.com/en/news/october-2026-ai-chip-selloff-explained",
+   "sourceName": "IfYouSpent"
+  },
+  {
+   "id": "softbank-openai-10b",
+   "date": "2026-10-01",
+   "title": "SoftBank sends OpenAI another $10B, finishing a $30B pledge",
+   "what": "SoftBank's total bet on OpenAI reaches $64.6B for about 13% ownership, paid partly with money it raised by selling bonds.",
+   "players": [
+    "softbank",
+    "openai"
+   ],
+   "kind": "deal",
+   "dir": "up",
+   "amount": 10000000000,
+   "amountLabel": "$10B into OpenAI",
+   "source": "https://www.vermoegenszentrum.ch/en/stock-exchange-and-markets/news/softbank-executes-usd-10-billion-third-tranche-openai-investment",
+   "sourceName": "VZ VermögensZentrum"
+  }
+ ]
+}

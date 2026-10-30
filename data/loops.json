@@ -1,0 +1,158 @@
+[
+ {
+  "id": "nvda-openai",
+  "chip": "Nvidia ⇄ OpenAI",
+  "title": "Nvidia's money comes back to Nvidia",
+  "summary": "Nvidia invests in OpenAI. OpenAI pays Oracle for computing. Oracle spends that on Nvidia chips.",
+  "steps": [
+   {
+    "flow": "nvda-openai-30b-equity",
+    "text": "Nvidia puts $30B into OpenAI's 2026 funding round. Its earlier $100B plan never became a contract."
+   },
+   {
+    "flow": "openai-oracle-300b",
+    "text": "OpenAI agrees to pay Oracle about $300B over five years for cloud computing."
+   },
+   {
+    "flow": "oracle-nvda-40b-abilene",
+    "text": "Oracle buys roughly $40B of Nvidia chips to build those data centers."
+   }
+  ]
+ },
+ {
+  "id": "amd-stock",
+  "chip": "Paid in AMD stock",
+  "title": "AMD pays its customers in its own stock",
+  "summary": "AMD lets its two biggest new customers buy its shares cheaply, and they commit to huge chip orders.",
+  "steps": [
+   {
+    "flow": "amd-openai-warrants",
+    "text": "AMD gives OpenAI the right to buy up to 160 million AMD shares."
+   },
+   {
+    "flow": "openai-amd-6gw",
+    "text": "OpenAI commits to 6 gigawatts of AMD chips."
+   },
+   {
+    "flow": "amd-meta-warrants",
+    "text": "AMD gives Meta the same deal: up to 160 million shares."
+   },
+   {
+    "flow": "meta-amd-6gw",
+    "text": "Meta commits to up to 6 gigawatts of AMD chips, reportedly over $100B."
+   }
+  ]
+ },
+ {
+  "id": "anthropic",
+  "chip": "Anthropic's backers",
+  "title": "Anthropic's investors are also its landlords",
+  "summary": "Each tech giant that invests in Anthropic gets much of that money back as cloud spending.",
+  "steps": [
+   {
+    "flow": "googl-anthropic-40b",
+    "text": "Google pledges up to $40B."
+   },
+   {
+    "flow": "anthropic-googl-tpus-2025",
+    "text": "Anthropic rents up to a million Google chips, worth tens of billions."
+   },
+   {
+    "flow": "amzn-anthropic-25b",
+    "text": "Amazon puts in $5B more, with up to $20B later."
+   },
+   {
+    "flow": "anthropic-aws-100b",
+    "text": "Anthropic commits over $100B to Amazon's cloud over ten years."
+   },
+   {
+    "flow": "nvda-anthropic-10b",
+    "text": "Nvidia pledges up to $10B, and Microsoft up to $5B."
+   },
+   {
+    "flow": "anthropic-azure-30b",
+    "text": "Anthropic commits $30B to Microsoft's cloud, running on Nvidia chips."
+   }
+  ]
+ },
+ {
+  "id": "coreweave",
+  "chip": "CoreWeave",
+  "title": "CoreWeave borrows to buy Nvidia chips, and Nvidia backs it",
+  "summary": "Nvidia owns part of CoreWeave and promised to rent its spare capacity. CoreWeave borrows heavily to buy Nvidia chips.",
+  "steps": [
+   {
+    "flow": "nvda-crwv-2b-2026",
+    "text": "Nvidia invests another $2B in CoreWeave."
+   },
+   {
+    "flow": "nvda-crwv-6-3b-backstop",
+    "text": "Nvidia agrees to buy up to $6.3B of computing CoreWeave can't sell."
+   },
+   {
+    "flow": "lenders-crwv-debt",
+    "text": "Lenders have put about $51.6B into CoreWeave, including leases."
+   },
+   {
+    "flow": "crwv-nvda-gpus",
+    "text": "CoreWeave spends that money on Nvidia chips."
+   },
+   {
+    "flow": "meta-crwv-21b",
+    "text": "Customers like Meta and OpenAI sign contracts to rent that capacity back."
+   }
+  ]
+ },
+ {
+  "id": "debt",
+  "chip": "Borrowed money",
+  "title": "More of the buildout now runs on debt",
+  "summary": "Cash from the companies' own profits no longer covers the spending, so they are borrowing.",
+  "steps": [
+   {
+    "flow": "lenders-meta-30b-2025",
+    "text": "Meta sells $30B of bonds in 2025, then $25B more in 2026."
+   },
+   {
+    "flow": "lenders-meta-hyperion",
+    "text": "Blue Owl's venture with Meta finances its $27B Hyperion data center."
+   },
+   {
+    "flow": "lenders-orcl-25b-bond",
+    "text": "Oracle sells $25B of bonds."
+   },
+   {
+    "flow": "lenders-msft-25b",
+    "text": "Microsoft sells about $25B of bonds this week, its first US deal since 2017."
+   },
+   {
+    "flow": "lenders-softbank-40b",
+    "text": "Banks lend SoftBank $40B..."
+   },
+   {
+    "flow": "softbank-openai-30b-2026",
+    "text": "...which helps SoftBank put $30B more into OpenAI."
+   }
+  ]
+ },
+ {
+  "id": "musk",
+  "chip": "SpaceX & xAI",
+  "title": "Borrowed billions for Nvidia's newest chips",
+  "summary": "Lenders finance SpaceX's chip lease. The chips come from Nvidia, which also invested in xAI.",
+  "steps": [
+   {
+    "flow": "nvda-xai-series-e",
+    "text": "Nvidia invests in xAI's funding round. Reports put it at $2B to $10B."
+   },
+   {
+    "flow": "lenders-xai-40b-lease",
+    "text": "An Apollo-led group lines up a roughly $40B lease for SpaceX this week."
+   },
+   {
+    "flow": "xai-nvda-vera-rubin",
+    "text": "That pays for about $40B of Nvidia's newest chips for xAI."
+   }
+  ]
+ }
+]

@@ -1,0 +1,88 @@
+name: Update and deploy
+
+on:
+  schedule:
+    # Prices: every 15 minutes, 9:00 AM to 5:45 PM US Eastern on weekdays (cron is UTC)
+    - cron: "*/15 13-21 * * 1-5"
+    # Claude refresh of news and deals: about 8:40 AM, 12:40, 2:40 and 4:40 PM Eastern on weekdays
+    - cron: "40 12,16,18,20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      claude:
+        description: "Also run the Claude news and deals refresh"
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+    paths: ["index.html", "data/**", ".github/workflows/update.yml"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update-and-deploy
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Update prices
+        if: github.event_name != 'push'
+        run: node scripts/update-prices.mjs
+
+      - name: Claude refresh (news and deals)
+        if: (github.event_name == 'schedule' && github.event.schedule == '40 12,16,18,20 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.claude)
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          WEB_SEARCH_TOOL: ${{ vars.WEB_SEARCH_TOOL }}
+          MAX_SEARCHES: ${{ vars.MAX_SEARCHES }}
+        run: node scripts/ai-refresh.mjs
+
+      - name: Save data
+        id: save
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "ai-money-map-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Update data $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build site
+        if: github.event_name != 'schedule' || steps.save.outputs.changed == 'true'
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r data _site/data
+
+      - uses: actions/configure-pages@v5
+        if: github.event_name != 'schedule' || steps.save.outputs.changed == 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'schedule' || steps.save.outputs.changed == 'true'
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+        if: github.event_name != 'schedule' || steps.save.outputs.changed == 'true'
