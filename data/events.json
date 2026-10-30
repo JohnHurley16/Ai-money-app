@@ -1,6 +1,54 @@
 {
- "asOf": "2026-10-30T16:32:58.978Z",
+ "asOf": "2026-10-30T21:00:45.503Z",
  "items": [
+  {
+   "id": "nasdaq-close-oct30-worst-since-june",
+   "date": "2026-10-30T16:00-04:00",
+   "title": "Nasdaq ends October with worst day since June",
+   "what": "Weak Intel and Amazon results fed doubts about AI spending. Nasdaq fell 2.9% and chip stocks sank, making October its worst month since March 2025.",
+   "players": [
+    "nvda",
+    "intc",
+    "amzn"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "-2.9% Nasdaq",
+   "source": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-futures-sink-amazon-intel-114737736.html",
+   "sourceName": "Reuters via Yahoo Finance"
+  },
+  {
+   "id": "neocloud-slump-oct30-crwv-nbis",
+   "date": "2026-10-30T16:00-04:00",
+   "title": "CoreWeave and Nebius each fall more than 10%",
+   "what": "AI cloud renters were hit hardest as investors fretted over their debt and big customers' spending, leaving both stocks down roughly a third in October.",
+   "players": [
+    "crwv",
+    "nbis"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "CRWV -11%, NBIS -11%",
+   "source": "https://www.nbcnews.com/business/markets/tech-stocks-nasdaq-ai-boom-fears-deepen-rcna606512",
+   "sourceName": "NBC News"
+  },
+  {
+   "id": "softbank-tokyo-drop-oct30",
+   "date": "2026-10-30",
+   "title": "SoftBank drops nearly 7% as Asian chip stocks tumble",
+   "what": "SoftBank, a key funder of OpenAI, fell sharply in Tokyo as the Amazon and Intel results hit AI-linked stocks across Asia.",
+   "players": [
+    "softbank"
+   ],
+   "kind": "market",
+   "dir": "down",
+   "amount": null,
+   "amountLabel": "-6.7% SoftBank",
+   "source": "https://finance.biggo.com/news/f20fbe7f-4d10-428a-b083-70757ed611bd",
+   "sourceName": "BigGo Finance"
+  },
   {
    "id": "chips-slide-oct30",
    "date": "2026-10-30T10:00-04:00",
