@@ -12,7 +12,11 @@ if (!KEY){
   process.exit(0);
 }
 const MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5-5";
-const TOOL = process.env.WEB_SEARCH_TOOL || "web_search_20250305";
+let TOOL = process.env.WEB_SEARCH_TOOL || "web_search_20250305";
+// Show any crash as an annotation on the run summary, not only in the log
+const fail = e => { console.log(`::error::Claude refresh failed: ${String(e?.message || e).replace(/[\r\n]+/g, " ").slice(0, 900)}`); process.exit(1); };
+process.on("uncaughtException", fail);
+process.on("unhandledRejection", fail);
 const MAX_SEARCHES = Number(process.env.MAX_SEARCHES || 15);
 
 const DATA = new URL("../data/", import.meta.url);
@@ -83,7 +87,17 @@ async function call(messages, withTools = true){
     signal: AbortSignal.timeout(15 * 60 * 1000)
   });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(`Claude API ${r.status}: ${JSON.stringify(j.error || j).slice(0, 600)}`);
+  if (!r.ok){
+    const msg = JSON.stringify(j.error || j);
+    // If this web search tool version isn't accepted, retry with the newest version the API lists
+    const offered = [...new Set(msg.match(/web_search_\d{8}/g) || [])].filter(t => t !== TOOL).sort();
+    if (withTools && r.status === 400 && offered.length){
+      console.log(`Web search tool ${TOOL} rejected; retrying with ${offered[offered.length - 1]}`);
+      TOOL = offered[offered.length - 1];
+      return call(messages, withTools);
+    }
+    throw new Error(`Claude API ${r.status}: ${msg.slice(0, 700)}`);
+  }
   return j;
 }
 const textOf = resp => (resp.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
