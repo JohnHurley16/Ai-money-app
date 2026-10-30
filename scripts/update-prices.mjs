@@ -12,13 +12,32 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const round = (x, d = 2) => (x == null || !isFinite(x)) ? null : Math.round(x * 10 ** d) / 10 ** d;
 const pct = (now, base) => (now && base) ? round((now / base - 1) * 100) : null;
 
+// Yahoo sometimes wants a session cookie + "crumb" (the same handshake its own site does).
+let session = null;
+async function getSession(){
+  if (session) return session;
+  session = {cookie: "", crumb: ""};
+  try {
+    const r = await fetch("https://fc.yahoo.com/", {headers: {"User-Agent": UA}, redirect: "manual", signal: AbortSignal.timeout(15000)});
+    const set = r.headers.getSetCookie ? r.headers.getSetCookie() : [r.headers.get("set-cookie") || ""];
+    session.cookie = set.map(c => c.split(";")[0]).filter(Boolean).join("; ");
+    const c = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {headers: {"User-Agent": UA, "Cookie": session.cookie}, signal: AbortSignal.timeout(15000)});
+    if (c.ok) session.crumb = (await c.text()).trim();
+    console.log(`Yahoo session: cookie ${session.cookie ? "yes" : "no"}, crumb ${session.crumb ? "yes" : "no (HTTP " + c.status + ")"}`);
+  } catch (e){ console.log("Yahoo session failed: " + e.message); }
+  return session;
+}
+
 async function chart(symbol){
   let lastErr;
   for (const host of ["query1", "query2"]){
     for (let attempt = 0; attempt < 2; attempt++){
       try {
-        const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=ytd&interval=1d&includePrePost=false`;
-        const r = await fetch(url, {headers: {"User-Agent": UA, "Accept": "application/json"}, signal: AbortSignal.timeout(20000)});
+        const s = attempt > 0 || host === "query2" ? await getSession() : null;
+        const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=ytd&interval=1d&includePrePost=false` + (s?.crumb ? `&crumb=${encodeURIComponent(s.crumb)}` : "");
+        const headers = {"User-Agent": UA, "Accept": "application/json"};
+        if (s?.cookie) headers.Cookie = s.cookie;
+        const r = await fetch(url, {headers, signal: AbortSignal.timeout(20000)});
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
         const res = j?.chart?.result?.[0];
@@ -117,4 +136,5 @@ if (updated){
   await writeJson("market.json", market);
 }
 console.log(`Updated ${updated} companies.` + (failed.length ? ` Failed: ${failed.join("; ")}` : ""));
-if (!updated) { console.log("::warning::No prices updated"); }
+if (failed.length) console.log(`::warning::Price fetch failed for ${failed.length}: ${failed.slice(0, 4).join(" | ").replace(/[\r\n]+/g, " ").slice(0, 600)}`);
+if (!updated) console.log("::warning::No prices updated");
