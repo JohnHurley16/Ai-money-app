@@ -208,7 +208,7 @@ footer ul{padding-left:18px;margin:8px 0 0;display:flex;flex-direction:column;ga
 .flows ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .fl{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:4px 1fr;gap:10px}
 .fl .stripe{border-radius:2px}
-.fl .l1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.fl .l1{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 10px;align-items:baseline}
 .fl .cp{font-weight:700;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;background:none;border:0;padding:0}
 .fl .am{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .fl .t{font-size:14px;margin-top:2px}
@@ -220,6 +220,41 @@ footer ul{padding-left:18px;margin:8px 0 0;display:flex;flex-direction:column;ga
 .empty{font-size:14px;color:var(--muted);margin:0}
 .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-160%);background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;border-radius:999px;padding:8px 14px;z-index:30;transition:transform .35s}
 .toast.show{transform:translate(-50%,0)}
+
+/* wider screens */
+.layout{display:flex;flex-direction:column;gap:26px}
+.tip{position:absolute;z-index:5;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:10px;padding:8px 11px;font-size:12.5px;line-height:1.4;max-width:270px;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+.tip b{display:block;font-size:13.5px}
+.tip .tl{opacity:.72}
+.tip .up{color:var(--gain)} .tip .down{color:var(--loss)}
+#map .hit{fill:none;stroke:transparent;stroke-width:12;pointer-events:stroke;cursor:help}
+@media (min-width: 700px){
+  .wrap{max-width:820px;padding:0 24px 56px}
+  .big{font-size:72px}
+  .headline{max-width:46ch}
+}
+@media (min-width: 1000px){
+  .wrap{max-width:1440px;padding:0 32px 56px;gap:22px}
+  .top{padding-top:20px}
+  .brand{font-size:24px}
+  .layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(360px,1fr);column-gap:32px;row-gap:34px;align-items:start}
+  .layout > *{grid-column:2}
+  .layout > .mapcard{grid-column:1;grid-row:1 / span 4;position:sticky;top:16px;height:calc(100vh - 92px);min-height:560px;display:flex;flex-direction:column}
+  .mapcard #map{flex:1 1 auto;min-height:0;height:100%}
+  .big{font-size:60px}
+  .delta{font-size:24px}
+  .headline{font-size:17px;max-width:none}
+  .chips{flex-wrap:wrap;overflow:visible}
+  /* details open as a side panel, so the map stays in view */
+  .sheet{left:auto;right:16px;top:16px;bottom:16px;width:min(440px,calc(100vw - 32px));max-height:none;border-radius:20px;border:1px solid var(--line);transform:translateX(calc(100% + 40px));box-shadow:0 16px 48px rgba(0,0,0,.22)}
+  .sheet .grab{display:none}
+  .sheet-in{padding:20px 22px 28px}
+  .backdrop{display:none}
+}
+@media (min-width: 1000px) and (max-height: 640px){
+  .layout > .mapcard{position:static;height:auto}
+  .mapcard #map{height:auto}
+}
 
 @media (prefers-reduced-motion: reduce){
   *{animation:none!important;transition:none!important}
@@ -233,6 +268,7 @@ footer ul{padding-left:18px;margin:8px 0 0;display:flex;flex-direction:column;ga
     <div class="live" id="live" aria-live="polite"><span class="dot"></span><span id="liveText">Loading…</span></div>
   </header>
 
+  <div class="layout">
   <section class="pulse" aria-label="Market pulse">
     <div class="eyebrow" id="pulseLabel">Public AI companies on this map</div>
     <div class="pulse-row"><span class="big" id="pulseTotal">—</span><span class="delta" id="pulseDelta">—</span></div>
@@ -248,6 +284,7 @@ footer ul{padding-left:18px;margin:8px 0 0;display:flex;flex-direction:column;ga
   <section class="mapcard" aria-label="Money map">
     <div class="mapbar"><span class="hint" id="mapHint">Tap a circle to follow its money</span></div>
     <svg id="map" viewBox="0 0 360 500" role="img" aria-label="Map of money flowing between AI companies"></svg>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
     <div class="legend" id="legend"></div>
     <p class="howto">Circles are sized by what each company is worth and colored by how much it gained or lost. Arrows point where the money goes. Thicker lines are bigger deals; dashed lines are borrowed money. Dashed circles are private companies, valued at their last funding round.</p>
   </section>
@@ -269,6 +306,8 @@ footer ul{padding-left:18px;margin:8px 0 0;display:flex;flex-direction:column;ga
     <div class="sec-head"><h2 id="moversH">Up &amp; down</h2><p id="moversNote">Public companies, today</p></div>
     <ul class="movers" id="movers"></ul>
   </section>
+
+  </div>
 
   <footer id="foot"></footer>
 </div>
@@ -392,7 +431,7 @@ const dateKey = s => { s = str(s); return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s + "T
 const state = {
   players: [], flows: [], events: [], market: {},
   asOf: {players:null, flows:null, events:null, market:null},
-  period: "day", focus: null, loop: null,
+  period: "day", focus: null, loop: null, hover: null,
   hidden: new Set(), feedKind: "all", feedShown: 10,
   live: false, seenEvents: new Set(), newEvents: new Set()
 };
@@ -489,7 +528,31 @@ function renderPulse(){
 }
 
 /* ---------- map ---------- */
-const W = 360, H = 500, RMAX = 39, RMIN = 6.5;
+let W = 360, H = 500, RMAX = 39, RMIN = 6.5, MODE = "phone";
+const mqDesk = window.matchMedia("(min-width: 1000px)");
+const mqMid = window.matchMedia("(min-width: 700px)");
+const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+// phone: tall map; tablet: landscape; desktop: matches the card's real shape
+function computeDims(){
+  if (mqDesk.matches && window.innerHeight > 640){
+    const r = $("map").getBoundingClientRect();
+    const w = r.width || 760, h = r.height || 620;
+    MODE = "desk"; W = 760; H = Math.round(Math.max(460, Math.min(1000, W * h / Math.max(w, 1))));
+  } else if (mqMid.matches){ MODE = "mid"; W = 760; H = 600; }
+  else { MODE = "phone"; W = 360; H = 500; }
+  const k = Math.sqrt((W * H) / (360 * 500));
+  RMAX = MODE === "phone" ? 39 : 39 * Math.min(1.45, 0.84 * k);
+  RMIN = MODE === "phone" ? 6.5 : 7.5;
+}
+window.addEventListener("resize", () => {
+  clearTimeout(window.__rz);
+  window.__rz = setTimeout(() => {
+    if (!state.players.length) return;
+    const before = {MODE, H};
+    computeDims();
+    if (before.MODE !== MODE || Math.abs(before.H - H) > 60){ positions = new Map(); renderMap(true); }
+  }, 180);
+});
 let positions = new Map(), mapEdges = [], nodeEls = new Map(), edgeEls = new Map();
 function radiusFor(v, maxV){ return Math.max(RMIN, Math.sqrt(v / maxV) * RMAX); }
 const textW = (s, size, bold) => String(s).length * size * (bold ? 0.6 : 0.54);
@@ -526,7 +589,7 @@ function layout(){
     const ring = order.filter(n => n.id !== "nvda");
     ring.forEach((n,i) => {
       const a = -Math.PI/2 + (i / ring.length) * Math.PI * 2;
-      n.x = W/2 + Math.cos(a) * 140; n.y = H/2 + Math.sin(a) * 200;
+      n.x = W/2 + Math.cos(a) * W * 0.39; n.y = H/2 + Math.sin(a) * H * 0.4;
     });
   }
   const ids = new Set(nodes.map(n => n.id));
@@ -612,6 +675,9 @@ function renderMap(rebuild){
   const svg = $("map");
   const P = byId();
   if (rebuild){
+    const prevMode = MODE, prevH = H;
+    computeDims();
+    if (prevMode !== MODE || Math.abs(prevH - H) > 60) positions = new Map();
     mapEdges = edgesFrom(state.flows).filter(e => P[e.from] && P[e.to]);
     layout();
     svg.textContent = "";
@@ -622,8 +688,8 @@ function renderMap(rebuild){
     }
     svg.append(defs);
     svg.append(sv("rect", {x:0, y:0, width:W, height:H, fill:"transparent", "data-bg":"1"}));
-    const gE = sv("g", {class:"edges"}), gP = sv("g", {class:"particles"}), gN = sv("g", {class:"nodes"});
-    svg.append(gE, gP, gN);
+    const gE = sv("g", {class:"edges"}), gP = sv("g", {class:"particles"}), gH = sv("g", {class:"hits"}), gN = sv("g", {class:"nodes"});
+    svg.append(gE, gP, gH, gN);
     edgeEls = new Map(); nodeEls = new Map();
     // bend offsets for parallel edges between the same ordered pair
     const pairCount = new Map();
@@ -648,7 +714,16 @@ function renderMap(rebuild){
           am.append(mp); c.append(am); gP.append(c); parts.push(c);
         }
       }
-      edgeEls.set(e.key, {path, parts, e});
+      let hit = null;
+      if (finePointer){
+        hit = sv("path", {d, class:"hit"});
+        hit.addEventListener("mouseenter", ev => { path.classList.add("stepon"); showTip(ev, edgeTip(e)); });
+        hit.addEventListener("mousemove", moveTip);
+        hit.addEventListener("mouseleave", () => { path.classList.remove("stepon"); hideTip(); });
+        hit.addEventListener("click", ev => { ev.stopPropagation(); selectNode(e.from === "lenders" ? e.to : e.from, true); });
+        gH.append(hit);
+      }
+      edgeEls.set(e.key, {path, parts, e, hit});
     }
     // nodes, biggest first so small ones sit on top
     const players = state.players.slice().sort((a,b) => sizeValue(b) - sizeValue(a));
@@ -664,7 +739,16 @@ function renderMap(rebuild){
       const chgT = sv("tspan", {class:"nchg"});
       valT.append(chgT);
       g.append(nameT, valT);
-      const tap = () => { if (state.focus === p.id) openSheet(p.id, true); else selectNode(p.id, false); };
+      const tap = () => {
+        hideTip();
+        if (mqDesk.matches || state.focus === p.id) selectNode(p.id, true);
+        else selectNode(p.id, false);
+      };
+      if (finePointer){
+        g.addEventListener("mouseenter", ev => { state.hover = p.id; applyFocus(); showTip(ev, nodeTip(p.id)); });
+        g.addEventListener("mousemove", moveTip);
+        g.addEventListener("mouseleave", () => { state.hover = null; applyFocus(); hideTip(); });
+      }
       g.addEventListener("click", ev => { ev.stopPropagation(); tap(); });
       g.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); tap(); } });
       gN.append(g);
@@ -701,9 +785,10 @@ function focusSets(){
       return {ekeys, nids};
     }
   }
-  if (state.focus){
-    const ekeys = new Set(), nids = new Set([state.focus]);
-    for (const {e} of edgeEls.values()) if (e.from === state.focus || e.to === state.focus){ ekeys.add(e.key); nids.add(e.from); nids.add(e.to); }
+  const fid = state.focus || state.hover;
+  if (fid){
+    const ekeys = new Set(), nids = new Set([fid]);
+    for (const {e} of edgeEls.values()) if (e.from === fid || e.to === fid){ ekeys.add(e.key); nids.add(e.from); nids.add(e.to); }
     return {ekeys, nids};
   }
   return null;
@@ -712,10 +797,11 @@ function applyFocus(){
   const fs = focusSets();
   const svg = $("map");
   svg.classList.toggle("focused", !!fs);
-  for (const {path, parts, e} of edgeEls.values()){
+  for (const {path, parts, e, hit} of edgeEls.values()){
     const hidden = state.hidden.has(e.type);
     const dim = hidden || (fs && !fs.ekeys.has(e.key));
     path.style.display = hidden ? "none" : "";
+    if (hit) hit.style.display = (hidden || (fs && !fs.ekeys.has(e.key) && !state.hover)) ? "none" : "";
     path.classList.toggle("dim", !!dim && !hidden);
     for (const c of parts){ c.style.display = (hidden || dim) ? "none" : ""; }
   }
@@ -724,6 +810,9 @@ function applyFocus(){
     n.g.classList.toggle("sel", state.focus === id);
   }
   const bar = document.querySelector(".mapbar");
+  const barKey = (state.focus || "") + "|" + (state.loop || "") + "|" + state.flows.length;
+  if (bar.dataset.key === barKey && bar.childNodes.length) return;
+  bar.dataset.key = barKey;
   bar.textContent = "";
   if (state.focus){
     const P = byId(), p = P[state.focus], id = state.focus;
@@ -743,14 +832,46 @@ function applyFocus(){
     bar.append(el("span", {class:"hint", text:"Showing loop"}),
       el("button", {type:"button", class:"focuschip", onclick: clearFocus}, [label, el("span", {text:"✕ Clear"})]));
   } else {
-    bar.append(el("span", {class:"hint", id:"mapHint", text:"Tap a circle to follow its money. Tap again for details."}));
+    bar.append(el("span", {class:"hint", id:"mapHint", text: mqDesk.matches ? "Hover a circle or line to trace the money. Click for details." : "Tap a circle to follow its money. Tap again for details."}));
   }
 }
-function clearFocus(){ state.focus = null; state.loop = null; stopPlay(); renderLoops(); applyFocus(); }
+function clearFocus(){ state.focus = null; state.loop = null; stopPlay(); renderLoops(); applyFocus(); if (mqDesk.matches && $("sheet").classList.contains("open")) closeSheet(); }
 function selectNode(id, open){
   state.loop = null; stopPlay(); state.focus = id; renderLoops(); applyFocus();
   if (open) openSheet(id);
 }
+
+/* tooltips (mouse only) */
+function nodeTip(id){
+  const p = byId()[id]; if (!p) return [];
+  const c = chgOf(p);
+  const inn = state.flows.filter(f => f.to === id), out = state.flows.filter(f => f.from === id);
+  const val = id === "lenders" ? fmtUSD(lendersTotal()) + " lent" : fmtUSD(p.value) + (p.public ? "" : " · private");
+  return [el("b", {text: p.name}),
+    el("div", null, [val, c != null ? " " : "", c != null ? el("span", {class: dirOf(c), text: fmtPct(c, true) + " " + PERIOD[state.period].label}) : null]),
+    el("div", {class:"tl", text: inn.length + " deals in · " + out.length + " out · click for details"})];
+}
+function edgeTip(e){
+  const P = byId(), name = id => P[id] ? P[id].name : id;
+  const kids = [el("b", {text: name(e.from) + " → " + name(e.to)}), el("div", {class:"tl", text: TYPES[e.type].label})];
+  for (const f of e.flows.slice(0, 3)) kids.push(el("div", null, [f.amountLabel ? f.amountLabel + ": " : "", f.title]));
+  if (e.flows.length > 3) kids.push(el("div", {class:"tl", text: "+" + (e.flows.length - 3) + " more"}));
+  return kids;
+}
+function showTip(ev, kids){
+  const t = $("tip"); t.textContent = ""; for (const k of kids) t.append(k);
+  t.hidden = false; moveTip(ev);
+}
+function moveTip(ev){
+  const t = $("tip"); if (t.hidden) return;
+  const box = t.parentElement.getBoundingClientRect();
+  let x = ev.clientX - box.left + 14, y = ev.clientY - box.top + 16;
+  const tw = t.offsetWidth, th = t.offsetHeight;
+  if (x + tw > box.width - 8) x = ev.clientX - box.left - tw - 14;
+  if (y + th > box.height - 8) y = ev.clientY - box.top - th - 12;
+  t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, y) + "px";
+}
+function hideTip(){ const t = $("tip"); if (t) t.hidden = true; }
 
 /* legend */
 function renderLegend(){
