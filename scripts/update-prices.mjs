@@ -1,140 +1,168 @@
 // Refreshes share prices, market values and index moves in data/players.json and data/market.json.
 // Runs in GitHub Actions every 15 minutes during US market hours. No API key needed.
-// Source: Yahoo Finance's public chart endpoint. Market value = price x shares outstanding (stored per company).
+// Sources: CNBC's public quote feed (one batched request per run), with Yahoo Finance as a backup.
+// Week, month and year-start prices come from daily bars and are cached per company once a day (p.ref).
 import fs from "node:fs/promises";
 
 const DATA = new URL("../data/", import.meta.url);
-const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
-
+const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 const readJson = async f => JSON.parse(await fs.readFile(new URL(f, DATA), "utf8"));
 const writeJson = async (f, v) => fs.writeFile(new URL(f, DATA), JSON.stringify(v, null, 1) + "\n");
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const round = (x, d = 2) => (x == null || !isFinite(x)) ? null : Math.round(x * 10 ** d) / 10 ** d;
 const pct = (now, base) => (now && base) ? round((now / base - 1) * 100) : null;
+const toNum = v => { if (typeof v === "number") return v; if (typeof v !== "string") return null; const n = parseFloat(v.replace(/[,%+]/g, "")); return isFinite(n) ? n : null; };
+const errors = [];
 
-// Yahoo sometimes wants a session cookie + "crumb" (the same handshake its own site does).
-let session = null;
-async function getSession(){
-  if (session) return session;
-  session = {cookie: "", crumb: ""};
-  try {
-    const r = await fetch("https://fc.yahoo.com/", {headers: {"User-Agent": UA}, redirect: "manual", signal: AbortSignal.timeout(15000)});
-    const set = r.headers.getSetCookie ? r.headers.getSetCookie() : [r.headers.get("set-cookie") || ""];
-    session.cookie = set.map(c => c.split(";")[0]).filter(Boolean).join("; ");
-    const c = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {headers: {"User-Agent": UA, "Cookie": session.cookie}, signal: AbortSignal.timeout(15000)});
-    if (c.ok) session.crumb = (await c.text()).trim();
-    console.log(`Yahoo session: cookie ${session.cookie ? "yes" : "no"}, crumb ${session.crumb ? "yes" : "no (HTTP " + c.status + ")"}`);
-  } catch (e){ console.log("Yahoo session failed: " + e.message); }
-  return session;
+// Our symbols -> CNBC symbols
+const CNBC = {"^IXIC": ".IXIC", "^GSPC": ".SPX", "JPY=X": "JPY=", "9984.T": "9984-JP"};
+const cnbcSym = s => CNBC[s] || s;
+
+async function getJson(url, headers = {}){
+  const r = await fetch(url, {headers: {"User-Agent": UA, "Accept": "application/json", ...headers}, signal: AbortSignal.timeout(20000)});
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
 }
 
-async function chart(symbol){
-  let lastErr;
-  for (const host of ["query1", "query2"]){
-    for (let attempt = 0; attempt < 2; attempt++){
-      try {
-        const s = attempt > 0 || host === "query2" ? await getSession() : null;
-        const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=ytd&interval=1d&includePrePost=false` + (s?.crumb ? `&crumb=${encodeURIComponent(s.crumb)}` : "");
-        const headers = {"User-Agent": UA, "Accept": "application/json"};
-        if (s?.cookie) headers.Cookie = s.cookie;
-        const r = await fetch(url, {headers, signal: AbortSignal.timeout(20000)});
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const j = await r.json();
-        const res = j?.chart?.result?.[0];
-        if (!res?.meta?.regularMarketPrice) throw new Error(j?.chart?.error?.description || "no price");
-        return res;
-      } catch (e){ lastErr = e; await sleep(800 * (attempt + 1)); }
-    }
-  }
-  throw new Error(`${symbol}: ${lastErr?.message}`);
-}
-
-// Turn a year-to-date daily chart into price + day / week / month / YTD changes.
-function analyze(res){
-  const m = res.meta;
-  const off = m.gmtoffset || 0;
-  const day = t => new Date((t + off) * 1000).toISOString().slice(0, 10);
-  const closes = res.indicators?.quote?.[0]?.close || [];
-  const bars = (res.timestamp || []).map((t, i) => ({d: day(t), c: closes[i]})).filter(b => b.c != null);
-  const price = m.regularMarketPrice;
-  const today = day(m.regularMarketTime);
-  const before = d => { for (let i = bars.length - 1; i >= 0; i--) if (bars[i].d < d) return bars[i].c; return null; };
+/* ---------- dates (US Eastern) ---------- */
+const etDate = (d = new Date()) => new Intl.DateTimeFormat("en-CA", {timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit"}).format(d);
+function refDays(today){
   const t = new Date(today + "T12:00:00Z");
   const monday = new Date(t); monday.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7));
-  const monthStart = today.slice(0, 8) + "01";
-  return {
-    price,
-    currency: m.currency,
-    time: m.regularMarketTime,
-    quoteDay: today,
-    chg1d: pct(price, before(today)),
-    chg1w: pct(price, before(monday.toISOString().slice(0, 10))),
-    chgMonth: pct(price, before(monthStart)),
-    chgYtd: pct(price, m.chartPreviousClose)
-  };
+  return {week: monday.toISOString().slice(0, 10), month: today.slice(0, 8) + "01", year: today.slice(0, 5) + "01-01"};
+}
+// last close strictly before each reference day
+function basesFrom(bars, today){
+  const R = refDays(today), out = {day: today};
+  for (const k of ["week", "month", "year"]){
+    let c = null; for (const b of bars) if (b.d < R[k]) c = b.c; out[k] = c;
+  }
+  return out;
 }
 
-function label(v){
-  if (v >= 1e12) return "$" + (v / 1e12).toFixed(2) + "T";
-  if (v >= 1e11) return "$" + Math.round(v / 1e9) + "B";
-  return "$" + (v / 1e9).toFixed(1) + "B";
+/* ---------- CNBC ---------- */
+async function cnbcQuotes(symbols){
+  const url = "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=" +
+    encodeURIComponent(symbols.map(cnbcSym).join("|")) + "&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1";
+  const j = await getJson(url);
+  let list = j?.FormattedQuoteResult?.FormattedQuote || [];
+  if (!Array.isArray(list)) list = [list];
+  const map = {};
+  for (const sym of symbols){
+    const q = list.find(x => x && (x.symbol === cnbcSym(sym) || x.altSymbol === cnbcSym(sym)));
+    if (!q || toNum(q.last) == null) continue;
+    const fd = q.FundamentalData || {};
+    map[sym] = {
+      price: toNum(q.last),
+      prevClose: toNum(q.previous_day_closing),
+      chgPct: toNum(q.change_pct),
+      currency: q.currencyCode || "USD",
+      time: q.last_time || "",
+      mktcap: toNum(fd.mktcap)
+    };
+  }
+  return map;
 }
-function etTime(sec){
-  return new Date(sec * 1000).toLocaleString("en-US", {timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit"}) + " ET";
+async function cnbcBars(sym, today){
+  const y = Number(today.slice(0, 4));
+  const end = today.replace(/-/g, "") + "235959";
+  const url = `https://ts-api.cnbc.com/harmony/app/bars/${encodeURIComponent(cnbcSym(sym))}/1D/${y - 1}1215000000/${end}/adjusted/EST5EDT.json`;
+  const j = await getJson(url);
+  const bars = (j?.barData?.priceBars || []).map(b => {
+    const t = String(b.tradeTime || "");
+    return {d: `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}`, c: toNum(b.close)};
+  }).filter(b => b.c != null && /^\d{4}-\d{2}-\d{2}$/.test(b.d)).sort((a, b) => a.d < b.d ? -1 : 1);
+  if (!bars.length) throw new Error("no bars");
+  return bars;
 }
 
+/* ---------- Yahoo (backup) ---------- */
+async function yahoo(sym){
+  const j = await getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=ytd&interval=1d`);
+  const res = j?.chart?.result?.[0];
+  const m = res?.meta; if (!m?.regularMarketPrice) throw new Error("no price");
+  const off = m.gmtoffset || 0, day = t => new Date((t + off) * 1000).toISOString().slice(0, 10);
+  const closes = res.indicators?.quote?.[0]?.close || [];
+  const bars = (res.timestamp || []).map((t, i) => ({d: day(t), c: closes[i]})).filter(b => b.c != null);
+  const today = day(m.regularMarketTime);
+  let prev = null; for (const b of bars) if (b.d < today) prev = b.c;
+  const bases = basesFrom(bars, today); bases.year = m.chartPreviousClose || bases.year;
+  return {price: m.regularMarketPrice, prevClose: prev, currency: m.currency || "USD", time: new Date(m.regularMarketTime * 1000).toISOString(), today, bases};
+}
+
+/* ---------- run ---------- */
 const players = await readJson("players.json");
 const market = await readJson("market.json");
-let fx = null; // JPY per USD, for SoftBank
-let updated = 0, failed = [];
+const today = etDate();
+const tracked = players.items.filter(p => p.public && (p.yahoo || p.ticker));
+const symOf = p => p.yahoo || p.ticker;
+const symbols = [...tracked.map(symOf), "^IXIC", "^GSPC", "JPY=X"];
 
-for (const p of players.items){
-  if (!p.public || !(p.yahoo || p.ticker)) continue;
-  const sym = p.yahoo || p.ticker;
-  try {
-    const q = analyze(await chart(sym));
-    let value = null;
-    if (p.shares){
-      let usdPrice = q.price;
-      if (q.currency && q.currency !== "USD"){
-        if (q.currency === "JPY"){
-          if (!fx) fx = (await chart("JPY=X")).meta.regularMarketPrice;
-          usdPrice = q.price / fx;
-        } else throw new Error("unsupported currency " + q.currency);
-      }
-      value = Math.round(p.shares * usdPrice);
-    }
-    Object.assign(p, {
-      price: round(q.price, 2),
-      chg1d: q.chg1d, chg1w: q.chg1w, chgYtd: q.chgYtd,
-      valueDate: q.quoteDay,
-      note: `Quote ${etTime(q.time)}. Market value = price × shares outstanding.` + (q.currency !== "USD" ? ` Converted from ${q.currency}.` : ""),
-      source: `https://finance.yahoo.com/quote/${encodeURIComponent(sym)}`,
-      sourceName: "Yahoo Finance"
-    });
-    if (value){ p.value = value; p.valueLabel = label(value); p.valueKind = "market cap"; }
-    updated++;
-  } catch (e){
-    failed.push(e.message);
+let quotes = {}, source = "CNBC";
+try { quotes = await cnbcQuotes(symbols); } catch (e){ errors.push("CNBC quotes: " + e.message); }
+if (Object.keys(quotes).length < tracked.length / 2){
+  // CNBC unavailable: fall back to Yahoo one symbol at a time
+  source = "Yahoo Finance";
+  for (const s of symbols){
+    try { const y = await yahoo(s); quotes[s] = y; } catch (e){ errors.push(`Yahoo ${s}: ${e.message}`); if (/429/.test(e.message)) break; }
+    await sleep(300);
   }
-  await sleep(250);
 }
 
-try {
-  const nq = analyze(await chart("^IXIC"));
-  const sp = analyze(await chart("^GSPC"));
-  Object.assign(market, {nasdaq1d: nq.chg1d, nasdaqMonth: nq.chgMonth, sp1d: sp.chg1d});
-  const src = "https://finance.yahoo.com/quote/%5EIXIC";
-  market.sources = [src, ...(market.sources || []).filter(u => u !== src)].slice(0, 6);
-} catch (e){ failed.push(e.message); }
+// week / month / year-start closes, refreshed once per day per symbol
+const refs = market.refs || (market.refs = {});
+async function basesFor(sym){
+  const q = quotes[sym];
+  if (q?.bases) return q.bases;
+  if (refs[sym]?.day === today) return refs[sym];
+  try { refs[sym] = basesFrom(await cnbcBars(sym, today), today); }
+  catch (e){ errors.push(`bars ${sym}: ${e.message}`); }
+  await sleep(150);
+  return refs[sym] || {};
+}
+
+const fx = quotes["JPY=X"]?.price || null; // yen per dollar
+let updated = 0;
+for (const p of tracked){
+  const sym = symOf(p), q = quotes[sym];
+  if (!q){ errors.push(`${sym}: no quote`); continue; }
+  const b = await basesFor(sym);
+  const usd = q.currency === "USD" ? 1 : (q.currency === "JPY" && fx ? 1 / fx : null);
+  if (usd == null){ errors.push(`${sym}: no FX for ${q.currency}`); continue; }
+  let value = q.mktcap ? q.mktcap * usd : (p.shares ? p.shares * q.price * usd : null);
+  // sanity check against the last value: ignore a market cap that moved more than 40% in one step
+  if (value && p.value && Math.abs(value / p.value - 1) > 0.4 && p.shares) value = p.shares * q.price * usd;
+  Object.assign(p, {
+    price: round(q.price, 2),
+    chg1d: q.prevClose ? pct(q.price, q.prevClose) : (q.chgPct ?? null),
+    chg1w: pct(q.price, b.week),
+    chgYtd: pct(q.price, b.year),
+    valueDate: today,
+    note: `Quote ${q.time ? new Date(q.time).toLocaleString("en-US", {timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit"}) + " ET" : "today"} from ${source}.`,
+    source: source === "CNBC" ? `https://www.cnbc.com/quotes/${encodeURIComponent(cnbcSym(sym))}` : `https://finance.yahoo.com/quote/${encodeURIComponent(sym)}`,
+    sourceName: source
+  });
+  if (value){
+    p.value = Math.round(value);
+    p.valueLabel = value >= 1e12 ? "$" + (value / 1e12).toFixed(2) + "T" : value >= 1e11 ? "$" + Math.round(value / 1e9) + "B" : "$" + (value / 1e9).toFixed(1) + "B";
+    p.valueKind = "market cap";
+  }
+  updated++;
+}
+
+for (const [sym, key1d, keyM] of [["^IXIC", "nasdaq1d", "nasdaqMonth"], ["^GSPC", "sp1d", null]]){
+  const q = quotes[sym]; if (!q) continue;
+  market[key1d] = q.prevClose ? pct(q.price, q.prevClose) : (q.chgPct ?? null);
+  if (keyM){ const b = await basesFor(sym); market[keyM] = pct(q.price, b.month); }
+}
 
 const now = new Date().toISOString();
 if (updated){
   players.asOf = now;
   market.asOf = now;
   await writeJson("players.json", players);
-  await writeJson("market.json", market);
 }
-console.log(`Updated ${updated} companies.` + (failed.length ? ` Failed: ${failed.join("; ")}` : ""));
-if (failed.length) console.log(`::warning::Price fetch failed for ${failed.length}: ${failed.slice(0, 4).join(" | ").replace(/[\r\n]+/g, " ").slice(0, 600)}`);
-if (!updated) console.log("::warning::No prices updated");
+await writeJson("market.json", market);
+console.log(`Updated ${updated}/${tracked.length} companies from ${source}.` + (errors.length ? ` Problems: ${errors.join("; ")}` : ""));
+if (errors.length) console.log(`::warning::Price problems (${errors.length}): ${errors.slice(0, 5).join(" | ").replace(/[\r\n]+/g, " ").slice(0, 700)}`);
+if (!updated){ console.log("::warning::No prices updated"); }
