@@ -1,12 +1,110 @@
 {
- "asOf": "2026-10-30T11:34:00-04:00",
- "nasdaq1d": -2.24,
- "nasdaqMonth": -4.71,
- "sp1d": -1.38,
+ "asOf": "2026-10-30T16:10:52.899Z",
+ "nasdaq1d": -2.66,
+ "nasdaqMonth": -5.11,
+ "sp1d": -1.65,
  "headline": "Intel, Amazon results deepen AI-spending fears; chip stocks drag Nasdaq lower",
  "sources": [
   "https://finance.yahoo.com/markets/live/stock-market-today-friday-october-30-dow-sp-500-nasdaq-amazon-intel-131609630.html",
   "https://tapeboard.com/blog/market-pulse-2026-10-01",
   "https://www.stocktitan.net/articles/stock-market-today-live-october-30-2026"
- ]
+ ],
+ "refs": {
+  "NVDA": {
+   "day": "2026-10-30",
+   "week": 210.96,
+   "month": 228.38,
+   "year": 186.5
+  },
+  "AMD": {
+   "day": "2026-10-30",
+   "week": 516.79,
+   "month": 611.76,
+   "year": 214.16
+  },
+  "AVGO": {
+   "day": "2026-10-30",
+   "week": 321.68,
+   "month": 351.19,
+   "year": 346.1
+  },
+  "INTC": {
+   "day": "2026-10-30",
+   "week": 86.96,
+   "month": 120.23,
+   "year": 36.9
+  },
+  "TSM": {
+   "day": "2026-10-30",
+   "week": 418.51,
+   "month": 456.19,
+   "year": 303.89
+  },
+  "MU": {
+   "day": "2026-10-30",
+   "week": 877.55,
+   "month": 1065.11,
+   "year": 285.41
+  },
+  "MSFT": {
+   "day": "2026-10-30",
+   "week": 524.51,
+   "month": 512.9,
+   "year": 483.62
+  },
+  "GOOGL": {
+   "day": "2026-10-30",
+   "week": 320.21,
+   "month": 344.08,
+   "year": 313
+  },
+  "AMZN": {
+   "day": "2026-10-30",
+   "week": 248,
+   "month": 249.15,
+   "year": 230.82
+  },
+  "META": {
+   "day": "2026-10-30",
+   "week": 642.62,
+   "month": 725.18,
+   "year": 660.09
+  },
+  "ORCL": {
+   "day": "2026-10-30",
+   "week": 126.16,
+   "month": 137.3,
+   "year": 194.91
+  },
+  "CRWV": {
+   "day": "2026-10-30",
+   "week": 54.235,
+   "month": 87.12,
+   "year": 71.61
+  },
+  "NBIS": {
+   "day": "2026-10-30",
+   "week": 158.74,
+   "month": 235.88,
+   "year": 83.705
+  },
+  "9984.T": {
+   "day": "2026-10-30",
+   "week": 4276,
+   "month": 6430,
+   "year": 4400
+  },
+  "SPCX": {
+   "day": "2026-10-30",
+   "week": 147.5778,
+   "month": 150.86,
+   "year": null
+  },
+  "^IXIC": {
+   "day": "2026-10-30",
+   "week": 25955.342,
+   "month": 26861.064,
+   "year": 23241.991
+  }
+ }
 }
