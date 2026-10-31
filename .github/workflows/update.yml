@@ -6,15 +6,21 @@ on:
     - cron: "*/15 13-21 * * 1-5"
     # Claude refresh of news and deals: about 8:40 AM, 12:40, 2:40 and 4:40 PM Eastern on weekdays
     - cron: "40 12,16,18,20 * * 1-5"
+    # Rebuild the simulation model after the close: about 5:25 PM Eastern (4:25 PM in winter)
+    - cron: "25 21 * * 1-5"
   workflow_dispatch:
     inputs:
       claude:
         description: "Also run the Claude news and deals refresh"
         type: boolean
         default: true
+      model:
+        description: "Rebuild the simulation model from price history"
+        type: boolean
+        default: false
   push:
     branches: [main]
-    paths: ["index.html", "data/**", ".github/workflows/update.yml"]
+    paths: ["index.html", "sim.html", "data/**", ".github/workflows/update.yml"]
 
 permissions:
   contents: write
@@ -53,13 +59,18 @@ jobs:
           MAX_SEARCHES: ${{ vars.MAX_SEARCHES }}
         run: node scripts/ai-refresh.mjs
 
+      - name: Build simulation model
+        if: (github.event_name == 'schedule' && github.event.schedule == '25 21 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.model)
+        continue-on-error: true
+        run: node scripts/build-model.mjs
+
       - name: Save data
         id: save
         if: github.event_name != 'push'
         run: |
           git config user.name "ai-money-map-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data
+          git add data model-src 2>/dev/null || git add data
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -73,6 +84,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/
+          [ -f sim.html ] && cp sim.html _site/ || true
           cp -r data _site/data
 
       - uses: actions/configure-pages@v5
