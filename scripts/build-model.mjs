@@ -113,7 +113,8 @@ function filterGarch(ret, g){
   return {s, z, next: Math.sqrt(s2)};
 }
 function ewma(ret, lambda = 0.94){
-  let s2 = variance(ret.slice(0, Math.min(ret.length, 60))) || 4e-4; const s = [], z = []; const m = 0;
+  // remove the sample's average so a short hot streak doesn't become a built-in trend
+  let s2 = variance(ret.slice(0, Math.min(ret.length, 60))) || 4e-4; const s = [], z = []; const m = mean(ret);
   for (const r of ret){ s.push(Math.sqrt(s2)); z.push((r - m) / Math.sqrt(s2)); s2 = lambda * s2 + (1 - lambda) * r * r; }
   return {s, z, next: Math.sqrt(s2)};
 }

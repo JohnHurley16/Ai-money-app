@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What Happens Next</title>
+<meta name="description" content="Monte Carlo simulation of how AI stocks could move after a shock, built from 14 years of real trading days.">
+<meta name="theme-color" content="#eceef2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0e14" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* layout idea: the answer first (big tiles), then the fan of futures, then who gets hurt, then what history and the backtest say */
+  --bg:#eceef2;
+  --panel:#ffffff;
+  --ink:#10131a;
+  --muted:#5a6271;
+  --line:#d5d9e1;
+  --gain:#0d8a4d;
+  --loss:#d2372a;
+  --accent:#2560d6;
+  --font-display:"Big Shoulders Display","Arial Narrow","Roboto Condensed",sans-serif;
+  --font-body:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0e14; --panel:#131821; --ink:#e8ecf3; --muted:#8c95a6; --line:#252d3b;
+    --gain:#2ec27a; --loss:#ff5e52; --accent:#5c94ff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0e14; --panel:#131821; --ink:#e8ecf3; --muted:#8c95a6; --line:#252d3b;
+  --gain:#2ec27a; --loss:#ff5e52; --accent:#5c94ff; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button,select,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 56px;display:flex;flex-direction:column;gap:26px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:14px}
+.brand{font-family:var(--font-display);font-weight:800;font-size:21px;letter-spacing:.06em;text-transform:uppercase;line-height:1;text-decoration:none}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:-12px}
+.tabs a{padding:10px 12px;font-size:14px;font-weight:600;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.stamp{font-size:12px;color:var(--muted);text-align:right}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.big{font-family:var(--font-display);font-weight:800;font-size:64px;line-height:.9;font-variant-numeric:tabular-nums}
+.up{color:var(--gain)} .down{color:var(--loss)} .flat{color:var(--muted)}
+h1{margin:0;font-size:19px;line-height:1.3;text-wrap:balance;font-weight:600}
+h2{font-family:var(--font-display);font-weight:800;font-size:28px;letter-spacing:.01em;line-height:1;margin:0;text-transform:uppercase}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec > p,.lead{margin:0;font-size:14.5px;color:var(--muted);max-width:62ch}
+.hero{display:flex;flex-direction:column;gap:10px}
+
+/* controls */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:inline-flex;align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.scenario-note{margin:0;font-size:14px;color:var(--muted)}
+.custom{display:grid;grid-template-columns:1fr;gap:10px;padding:12px;border:1px dashed var(--line);border-radius:14px}
+.custom[hidden]{display:none}
+.custom label{font-size:13px;font-weight:600;display:flex;flex-direction:column;gap:6px}
+.custom select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.custom input[type=range]{width:100%;accent-color:var(--loss)}
+.custom .val{font-family:var(--font-display);font-weight:800;font-size:26px}
+
+/* answer tiles */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 13px;display:flex;flex-direction:column;gap:4px;min-height:118px}
+.tile .q{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.3}
+.tile .a{font-family:var(--font-display);font-weight:800;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.tile .s{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meter{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:auto}
+.meter i{display:block;height:100%;border-radius:3px}
+.busy{opacity:.45;transition:opacity .2s}
+
+/* fan chart */
+.chartcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 10px 8px;position:relative}
+.chartcard h3{margin:2px 4px 2px;font-size:15px}
+.chartcard .sub{margin:0 4px 6px;font-size:12.5px;color:var(--muted)}
+#fan{display:block;width:100%;height:auto;touch-action:pan-y}
+#fan text{font-family:var(--font-body);font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums}
+#fan .grid{stroke:var(--line);stroke-width:1}
+#fan .b90{fill:var(--accent);opacity:.13}
+#fan .b50{fill:var(--accent);opacity:.24}
+#fan .med{fill:none;stroke:var(--accent);stroke-width:2.2}
+#fan .ref{stroke:var(--muted);stroke-dasharray:4 4;stroke-width:1.2}
+#fan .refl{fill:var(--muted);font-weight:600}
+#fan .cross{stroke:var(--ink);stroke-width:1;opacity:.5}
+.ftip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;border-radius:10px;padding:7px 10px;line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:4px 4px 2px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:16px;height:10px;border-radius:2px;display:inline-block}
+
+/* company list */
+.rows{list-style:none;margin:0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(84px,30%) 62px;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .nm{font-weight:700;font-size:14.5px;line-height:1.2;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.row .sub{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:1px 5px;background:var(--loss);color:#fff}
+.range{position:relative;height:14px}
+.range::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+.range .r{position:absolute;top:5px;height:4px;border-radius:2px;background:var(--line)}
+.range .m{position:absolute;top:2px;width:3px;height:10px;border-radius:1px}
+.row .pct{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:14px}
+
+/* past drops */
+.lens{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.lrow{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,.8fr));gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-size:13.5px;font-variant-numeric:tabular-nums}
+.lrow:first-child{border-top:0}
+.lrow.head{font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.25}
+.lrow .who{font-weight:700;line-height:1.25}
+.lrow .who small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.lrow .v{text-align:right;font-weight:700}
+.lrow.sim{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.hist{list-style:none;margin:0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:12px;align-items:center;padding:9px 14px;border-top:1px solid var(--line);font-size:13.5px;font-variant-numeric:tabular-nums}
+.hrow:first-child{border-top:0}
+.hrow.head{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding-top:10px;padding-bottom:8px}
+.hrow .d{font-weight:600}
+.hrow .l{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.hrow .c{min-width:56px;text-align:right;font-weight:700}
+.more{border:1px solid var(--line);background:transparent;border-radius:12px;padding:10px;font-weight:600;font-size:14px;cursor:pointer}
+
+/* trust */
+.fact{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.fact b{display:block;font-family:var(--font-display);font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.fact span{font-size:12.5px;color:var(--muted)}
+.trust ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);max-width:66ch}
+.score{display:flex;gap:10px;flex-wrap:wrap}
+.score .fact{flex:1;min-width:150px}
+footer{font-size:12.5px;color:var(--muted)}
+
+@media (min-width: 700px){
+  .wrap{max-width:820px;padding:0 24px 64px}
+  .tiles{grid-template-columns:repeat(4,1fr)}
+  .big{font-size:76px}
+  .custom{grid-template-columns:1fr 1.4fr}
+}
+@media (min-width: 1100px){
+  .wrap{max-width:1360px;padding:0 32px 64px}
+  .top{padding-top:20px}
+  .brand{font-size:24px}
+  .grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(380px,1fr);gap:28px 32px;align-items:start}
+  .grid2 > .left{display:flex;flex-direction:column;gap:22px}
+  .grid2 > .right{display:flex;flex-direction:column;gap:30px}
+}
+@media (max-width: 1099px){ .grid2,.grid2 > .left,.grid2 > .right{display:flex;flex-direction:column;gap:26px} }
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./">AI Money Map</a>
+    <div class="stamp" id="stamp">Loading model…</div>
+  </header>
+  <nav class="tabs" aria-label="Pages">
+    <a href="./">Money map</a>
+    <a href="sim.html" aria-current="page">What's next</a>
+  </nav>
+
+  <div id="app" class="grid2">
+    <div class="left">
+      <section class="hero" aria-labelledby="heroQ">
+        <div class="eyebrow" id="heroDate">&nbsp;</div>
+        <div class="big down" id="heroBig">—</div>
+        <h1 id="heroQ">Loading 14 years of trading days…</h1>
+      </section>
+
+      <section class="sec" aria-labelledby="nextH">
+        <h2 id="nextH">What's likely next</h2>
+        <p class="lead" id="nextLead">10,000 simulated futures, built from real trading days since 2012 and scaled to how jumpy the market is right now.</p>
+        <div class="chips" id="scenarios" role="group" aria-label="Shock to test"></div>
+        <p class="scenario-note" id="scenarioNote"></p>
+        <div class="custom" id="custom" hidden>
+          <label for="cAsset">Company
+            <select id="cAsset"></select>
+          </label>
+          <label for="cSize">One-day move <span class="val" id="cVal">−20%</span>
+            <input type="range" id="cSize" min="-60" max="30" step="1" value="-20">
+          </label>
+        </div>
+        <div class="seg" role="group" aria-label="Time ahead" id="horizon">
+          <button type="button" data-h="5" aria-pressed="false">1 week</button>
+          <button type="button" data-h="21" aria-pressed="true">1 month</button>
+          <button type="button" data-h="63" aria-pressed="false">3 months</button>
+        </div>
+        <div class="tiles" id="tiles"></div>
+      </section>
+
+      <section class="chartcard" aria-labelledby="fanH">
+        <h3 id="fanH">Total value of the map's public companies</h3>
+        <p class="sub" id="fanSub"></p>
+        <svg id="fan" viewBox="0 0 640 300" role="img" aria-label="Range of simulated futures"></svg>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>Most likely path</span>
+          <span><i style="background:var(--accent);opacity:.45"></i>Middle half of futures</span>
+          <span><i style="background:var(--accent);opacity:.22"></i>9 in 10 futures</span>
+        </div>
+        <div class="ftip" id="ftip" hidden></div>
+      </section>
+    </div>
+
+    <div class="right">
+      <section class="sec" aria-labelledby="spreadH">
+        <h2 id="spreadH">Who gets hurt</h2>
+        <p id="spreadLead">Each company's most likely move, with the range from bad case to good case.</p>
+        <ul class="rows" id="rows"></ul>
+      </section>
+
+      <section class="sec" aria-labelledby="histH">
+        <h2 id="histH">What history says</h2>
+        <p id="histLead"></p>
+        <div class="lens" id="lens"></div>
+        <ul class="hist" id="hist"></ul>
+        <button type="button" class="more" id="histMore">Show all past drops</button>
+      </section>
+
+      <section class="sec trust" aria-labelledby="trustH">
+        <h2 id="trustH">How much to trust this</h2>
+        <div class="score" id="score"></div>
+        <ul id="trustList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <footer><p>Not investment advice. A simulation shows a range of possibilities based on the past, not a forecast of what will happen. The model is rebuilt each weekday after the close. <a href="https://github.com/JohnHurley16/Ai-money-app" target="_blank" rel="noopener noreferrer">Code and data</a>.</p></footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, kids, ns){
+  const e = ns ? document.createElementNS(ns, tag) : document.createElement(tag);
+  if (attrs) for (const k in attrs){ const v = attrs[k]; if (v == null || v === false) continue;
+    if (k === "class") e.setAttribute("class", v); else if (k === "text") e.textContent = v;
+    else if (k.slice(0,2) === "on") e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? "" : v); }
+  if (kids != null) for (const c of [].concat(kids)) if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  return e;
+}
+const sv = (t,a,k) => el(t,a,k,SVGNS);
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const dateLong = s => { const d = new Date(s + "T12:00:00Z"); return DAYS[d.getUTCDay()] + ", " + MONTHS[d.getUTCMonth()] + " " + d.getUTCDate(); };
+const dateShort = s => { const d = new Date(s + "T12:00:00Z"); return MONTHS[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + d.getUTCFullYear(); };
+const weekday = s => DAYS[new Date(s + "T12:00:00Z").getUTCDay()];
+const usdT = v => { const a = Math.abs(v); return (v < 0 ? "−" : "") + "$" + (a >= 1e12 ? (a/1e12).toFixed(1) + "T" : Math.round(a/1e9) + "B"); };
+function pct(p, digits){
+  if (p == null || !isFinite(p)) return "—";
+  const a = Math.abs(p), d = digits != null ? digits : (a >= 10 ? 0 : 1);
+  return (p > 0.0499 ? "+" : p < -0.0499 ? "−" : "") + a.toFixed(d) + "%";
+}
+const share = x => x == null ? "—" : Math.round(x * 100) + "%";
+const dir = p => p == null || Math.abs(p) < 0.05 ? "flat" : p > 0 ? "up" : "down";
+
+/* ---------- scenarios ---------- */
+const SCEN = [
+  {id:"base", label:"Nothing else happens", kind:"none", note:"No new shock. The simulation starts from today's market, which is jumpier than usual after the latest drop."},
+  {id:"selloff", label:"Another −5% day", kind:"basket", size:-0.05, note:"The next trading day brings another 5% drop for the whole group, shaped like real selloff days."},
+  {id:"rally", label:"Relief rally +5%", kind:"basket", size:0.05, note:"The next trading day brings a 5% bounce for the whole group, shaped like real rally days."},
+  {id:"nvda", label:"Nvidia −15%", kind:"asset", asset:"nvda", size:-0.15, note:"Nvidia alone falls 15% in a day, about the size of its January 2025 DeepSeek drop. Others move the way they did on Nvidia's worst real days."},
+  {id:"crwv", label:"CoreWeave fails −50%", kind:"asset", asset:"crwv", size:-0.5, note:"The most indebted chip renter loses half its value in a day. Others move the way they did on CoreWeave's worst real days."},
+  {id:"ndx", label:"Tech crash −8%", kind:"ndx", size:-0.08, note:"The whole Nasdaq-100 falls 8% in a day, shaped like its real crash days."},
+  {id:"custom", label:"Pick your own", kind:"asset", note:"Pick a company and a one-day move. Everyone else moves the way they did on that company's most similar real days."}
+];
+const state = {scen:"base", H:21, custom:{asset:"nvda", size:-0.2}, model:null, res:{}, histAll:false};
+
+/* ---------- worker: the Monte Carlo engine ---------- */
+// Filtered historical simulation: each simulated day replays one real historical day for every company at once
+// (keeping how they moved together), scaled by each company's current volatility, which then updates with a
+// GJR-GARCH rule (big drops raise future volatility more than rallies do).
+const workerSrc = `
+self.onmessage = (ev) => {
+  const m = ev.data;
+  const {A, T, N, H, values, mu, s0, om, al, ga, be, garch, rho, Z, zB, zN, sB, sN, own, ownLen, shock, seed, preDrop, bigLoss, capNow} = m;
+  let x = seed >>> 0 || 1;
+  const rnd = () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+  const NONE = -32768;
+  const valid = []; for (let t = 0; t < T; t++) if (zB[t] !== NONE) valid.push(t);
+  // shock day: draw from the real days whose standardized move is closest to the shock
+  let pool = null, forcedA = -1, forcedR = 0, scaleBy = null;
+  if (shock && shock.kind !== "none"){
+    let zs = null, sig = 0;
+    if (shock.kind === "basket"){ zs = zB; sig = sB; }
+    else if (shock.kind === "ndx"){ zs = zN; sig = sN; }
+    else { zs = Z.subarray(shock.a * T, (shock.a + 1) * T); sig = s0[shock.a]; forcedA = shock.a; forcedR = Math.log(1 + shock.size); }
+    const target = Math.log(1 + shock.size) / sig;
+    const cand = [];
+    for (let t = 0; t < T; t++){ const v = zs[t]; if (v !== NONE && zB[t] !== NONE && Math.sign(v) === Math.sign(target)) cand.push([t, v / 100]); }
+    cand.sort((a, b) => Math.abs(a[1] - target) - Math.abs(b[1] - target));
+    const k = Math.max(25, Math.round(cand.length * 0.01));
+    pool = cand.slice(0, k).map(c => c[0]);
+    if (shock.kind !== "asset") scaleBy = {zs, target};
+  }
+  const P = H + 1;
+  const paths = new Float32Array(N * P);
+  const firstBack = new Int16Array(N).fill(32767);
+  const firstBig = new Int16Array(N).fill(32767);
+  const hz = [5, 21, 63].filter(h => h <= H);
+  const term = new Float32Array(N * A * hz.length);
+  const v = new Float64Array(A), s2 = new Float64Array(A), cap2 = new Float64Array(A);
+  // a single extreme day can't push a stock's daily volatility past 2x today's level (or 10%)
+  for (let i = 0; i < A; i++){ const c = Math.max(2 * s0[i], 0.10); cap2[i] = c * c; }
+  for (let p = 0; p < N; p++){
+    for (let i = 0; i < A; i++){ v[i] = 1; s2[i] = s0[i] * s0[i]; }
+    let prevV = 1; paths[p * P] = 1;
+    for (let d = 1; d <= H; d++){
+      const shockDay = d === 1 && pool && pool.length;
+      const t = shockDay ? pool[(rnd() * pool.length) | 0] : valid[(rnd() * valid.length) | 0];
+      let k = 1;
+      // scale the whole replayed day so the group (or Nasdaq) moves by exactly the shock size
+      if (shockDay && scaleBy){ const zt = scaleBy.zs[t] / 100; if (Math.abs(zt) > 0.3) k = Math.max(0.3, Math.min(3, scaleBy.target / zt)); }
+      for (let i = 0; i < A; i++){
+        let z = Z[i * T + t];
+        if (z === NONE){ const zo = own[i * ownLen + ((rnd() * ownLen) | 0)]; z = rho[i] * zB[t] + Math.sqrt(Math.max(0, 1 - rho[i] * rho[i])) * zo; }
+        z /= 100;
+        let ei = Math.sqrt(s2[i]) * z * k;
+        let r = mu[i] + ei;
+        if (shockDay && i === forcedA){ r = forcedR; ei = r - mu[i]; }
+        v[i] *= Math.exp(r);
+        if (garch[i]) s2[i] = om[i] + (al[i] + (ei < 0 ? ga[i] : 0)) * ei * ei + be[i] * s2[i];
+        else s2[i] = 0.94 * s2[i] + 0.06 * ei * ei;
+        if (s2[i] > cap2[i]) s2[i] = cap2[i];
+      }
+      let V = 0; for (let i = 0; i < A; i++) V += values[i] * v[i]; V /= capNow;
+      paths[p * P + d] = V;
+      if (firstBack[p] === 32767 && V >= preDrop) firstBack[p] = d;
+      // "another" big day: the shock day itself doesn't count
+      if (firstBig[p] === 32767 && !shockDay && (prevV - V) * capNow >= bigLoss) firstBig[p] = d;
+      prevV = V;
+      const hi = hz.indexOf(d);
+      if (hi >= 0) for (let i = 0; i < A; i++) term[(hi * N + p) * A + i] = v[i];
+    }
+  }
+  self.postMessage({paths, firstBack, firstBig, term, hz, N, H, A, poolSize: pool ? pool.length : 0}, [paths.buffer, firstBack.buffer, firstBig.buffer, term.buffer]);
+};`;
+let worker = null;
+try { worker = new Worker(URL.createObjectURL(new Blob([workerSrc], {type:"text/javascript"}))); } catch(_){ worker = null; }
+
+/* ---------- prepare model data for the engine ---------- */
+let engineInput = null;
+function prepare(M){
+  const NONE = -32768;
+  const assets = M.assets;
+  const A = assets.length, T = M.basket.z.length;
+  const Z = new Int16Array(A * T), ownLen = 2000, own = new Int16Array(A * ownLen);
+  assets.forEach((a, i) => {
+    const zs = []; for (let t = 0; t < T; t++){ const z = a.z[t]; Z[i * T + t] = z == null ? NONE : z; if (z != null) zs.push(z); }
+    for (let k = 0; k < ownLen; k++) own[i * ownLen + k] = zs.length ? zs[(k * 7919) % zs.length] : 0;
+  });
+  const zB = new Int16Array(T), zN = new Int16Array(T);
+  for (let t = 0; t < T; t++){ zB[t] = M.basket.z[t] == null ? NONE : M.basket.z[t]; zN[t] = M.ndx.z[t] == null ? NONE : M.ndx.z[t]; }
+  const capNow = assets.reduce((s, a) => s + a.value, 0);
+  const yPct = M.yesterday.basketPct / 100;
+  engineInput = {
+    A, T, values: Float64Array.from(assets.map(a => a.value)), mu: Float64Array.from(assets.map(a => a.mu || 0)),
+    s0: Float64Array.from(assets.map(a => a.sigma)), om: Float64Array.from(assets.map(a => a.fit ? a.fit.omega : 0)),
+    al: Float64Array.from(assets.map(a => a.fit ? a.fit.alpha : 0)), ga: Float64Array.from(assets.map(a => a.fit ? a.fit.gamma : 0)),
+    be: Float64Array.from(assets.map(a => a.fit ? a.fit.beta : 0)), garch: Uint8Array.from(assets.map(a => a.fit ? 1 : 0)),
+    rho: Float64Array.from(assets.map(a => isFinite(a.rho) ? a.rho : 0.5)),
+    Z, zB, zN, sB: M.basket.sigma, sN: M.ndx.sigma, own, ownLen,
+    capNow, preDrop: yPct < 0 ? 1 / (1 + yPct) : 1, bigLoss: 1e12
+  };
+}
+
+function shockFor(id){
+  const s = SCEN.find(x => x.id === id), M = state.model;
+  if (!s || s.kind === "none") return {kind:"none"};
+  if (s.kind === "asset"){
+    const aid = id === "custom" ? state.custom.asset : s.asset;
+    const a = M.assets.findIndex(x => x.id === aid);
+    if (a < 0) return {kind:"none"};
+    return {kind:"asset", a, size: id === "custom" ? state.custom.size : s.size};
+  }
+  return {kind:s.kind, size:s.size};
+}
+const cacheKey = () => state.scen === "custom" ? "custom:" + state.custom.asset + ":" + state.custom.size : state.scen;
+let runId = 0;
+function run(){
+  const key = cacheKey();
+  if (state.res[key]){ render(state.res[key]); return; }
+  const id = ++runId;
+  document.querySelectorAll("#tiles, #fan, #rows").forEach(n => n.classList.add("busy"));
+  const shock = shockFor(state.scen);
+  const seed = [...key].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 2166136261);
+  const msg = Object.assign({}, engineInput, {N: 10000, H: 63, shock, seed});
+  const done = r => { if (id !== runId) return; state.res[key] = summarize(r, shock); render(state.res[key]); };
+  if (worker){
+    worker.onmessage = ev => done(ev.data);
+    worker.onerror = () => { worker = null; run(); };
+    worker.postMessage(msg);
+  } else {
+    // fallback without a worker: same engine on the main thread with fewer futures
+    const fake = {postMessage: d => done(d)};
+    (new Function("self", workerSrc + "; return self;"))(fake).onmessage({data: Object.assign(msg, {N: 3000})});
+  }
+}
+
+/* ---------- turn raw paths into answers ---------- */
+function q(sorted, p){ const i = (sorted.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo); }
+function summarize(r, shock){
+  const {paths, firstBack, firstBig, term, hz, N, H, A} = r, P = H + 1;
+  const bands = [], col = new Float32Array(N);
+  for (let d = 0; d <= H; d++){
+    for (let p = 0; p < N; p++) col[p] = paths[p * P + d];
+    const s = col.slice().sort();
+    bands.push({p5:q(s,0.05), p25:q(s,0.25), p50:q(s,0.5), p75:q(s,0.75), p95:q(s,0.95)});
+  }
+  const byH = {};
+  hz.forEach((h, hi) => {
+    let back = 0, big = 0, up = 0;
+    for (let p = 0; p < N; p++){ if (firstBack[p] <= h) back++; if (firstBig[p] <= h) big++; if (paths[p * P + h] > 1) up++; }
+    const assets = [], tmp = new Float32Array(N);
+    for (let i = 0; i < A; i++){
+      let upI = 0; for (let p = 0; p < N; p++){ const val = term[(hi * N + p) * A + i]; tmp[p] = val; if (val > 1) upI++; }
+      const s = tmp.slice().sort();
+      assets.push({i, p5:(q(s,0.05)-1)*100, p50:(q(s,0.5)-1)*100, p95:(q(s,0.95)-1)*100, up: upI / N});
+    }
+    byH[h] = {back: back / N, big: big / N, up: up / N, b: bands[h], assets};
+  });
+  return {bands, byH, shock, poolSize: r.poolSize};
+}
+
+/* ---------- render ---------- */
+function ordinal(n){ const s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+function prevWeekday(s){ const d = new Date(s + "T12:00:00Z"); do { d.setUTCDate(d.getUTCDate() - 1); } while (d.getUTCDay() === 0 || d.getUTCDay() === 6); return d.toISOString().slice(0, 10); }
+function renderHero(M){
+  const y = M.yesterday, down = y.usd < 0;
+  $("heroDate").textContent = dateLong(y.date);
+  $("heroBig").textContent = (down ? "−" : "+") + usdT(Math.abs(y.usd));
+  $("heroBig").className = "big " + (down ? "down" : "up");
+  const years = new Date(M.lastDate).getUTCFullYear() - 2012;
+  const rankTxt = down ? (y.rank <= 1 ? "the worst day" : `the ${ordinal(y.rank)} worst day`) + ` in ${years} years` : "";
+  $("heroQ").textContent = `The public AI companies on the map ${down ? "lost" : "gained"} ${pct(Math.abs(y.basketPct)).replace("+", "")} of their value on ${weekday(y.date)}${rankTxt ? ", " + rankTxt : ""}. What usually happens next?`;
+  $("stamp").textContent = "Data through " + dateShort(M.lastDate);
+}
+const HLAB = {5:"within a week", 21:"within a month", 63:"within 3 months"};
+const HEND = {5:"a week from now", 21:"a month from now", 63:"3 months from now"};
+
+function renderScenarios(){
+  const box = $("scenarios"); box.textContent = "";
+  for (const s of SCEN){
+    box.append(el("button", {type:"button", "aria-pressed": state.scen === s.id ? "true" : "false", onclick: () => { state.scen = s.id; renderScenarios(); run(); }}, s.label));
+  }
+  $("scenarioNote").textContent = SCEN.find(x => x.id === state.scen).note;
+  $("custom").hidden = state.scen !== "custom";
+}
+
+function tile(qTxt, aTxt, sub, cls, meter){
+  return el("div", {class:"tile"}, [
+    el("div", {class:"q", text:qTxt}),
+    el("div", {class:"a " + (cls || ""), text:aTxt}),
+    sub ? el("div", {class:"s", text:sub}) : null,
+    meter != null ? el("div", {class:"meter"}, el("i", {style:`width:${Math.round(meter*100)}%;background:var(--${cls === "down" ? "loss" : cls === "up" ? "gain" : "accent"})`})) : null
+  ]);
+}
+function render(R){
+  document.querySelectorAll(".busy").forEach(n => n.classList.remove("busy"));
+  const M = state.model, H = state.H, h = R.byH[H], cap = engineInput.capNow;
+  const lostTxt = usdT(Math.abs(M.yesterday.usd));
+  const before = weekday(prevWeekday(M.yesterday.date));
+  const med = (h.b.p50 - 1) * 100, bad = (h.b.p5 - 1) * 100, good = (h.b.p95 - 1) * 100;
+  const change = cap * (h.b.p50 - 1);
+  const tiles = $("tiles"); tiles.textContent = "";
+  tiles.append(
+    tile(`Chance the ${lostTxt} comes back ${HLAB[H]}`, share(h.back), `back to ${before}'s level at some point`, h.back >= 0.5 ? "up" : "down", h.back),
+    tile(`Most likely ${HEND[H]}`, pct(med), `${usdT(cap * h.b.p50)} total (${change >= 0 ? "+" : ""}${usdT(change)})`, dir(med)),
+    tile("Bad case (1 in 20)", pct(bad), `${usdT(cap * h.b.p5)} total · good case ${pct(good)}`, "down"),
+    tile(`Another ${usdT(1e12)} drop ${HLAB[H]}`, share(h.big), "chance of at least one more day this bad", h.big >= 0.5 ? "down" : "flat", h.big)
+  );
+  drawFan(R);
+  renderRows(R);
+  renderLens();
+}
+
+/* fan chart */
+function niceTicks(a, b, n){
+  const raw = (b - a) / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+  const step = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * mag;
+  const out = []; for (let v = Math.ceil(a / step) * step; v <= b; v += step) out.push(v);
+  return out;
+}
+function tradingDays(from, n){
+  const out = [], d = new Date(from + "T12:00:00Z");
+  while (out.length < n){ d.setUTCDate(d.getUTCDate() + 1); const w = d.getUTCDay(); if (w !== 0 && w !== 6) out.push(d.toISOString().slice(0, 10)); }
+  return out;
+}
+function drawFan(R){
+  const svg = $("fan"), M = state.model, H = state.H, cap = engineInput.capNow;
+  const wide = svg.clientWidth > 520;
+  const W = wide ? 640 : 360, Hh = wide ? 300 : 250;
+  svg.setAttribute("viewBox", `0 0 ${W} ${Hh}`);
+  svg.textContent = "";
+  const pad = {l: wide ? 52 : 46, r: 12, t: 12, b: 26};
+  const bands = R.bands.slice(0, H + 1), pre = engineInput.preDrop;
+  let lo = Math.min(...bands.map(b => b.p5), 1, pre), hi = Math.max(...bands.map(b => b.p95), 1, pre);
+  const span = hi - lo; lo -= span * 0.06; hi += span * 0.08;
+  const x = d => pad.l + (d / H) * (W - pad.l - pad.r);
+  const y = v => pad.t + (1 - (v - lo) / (hi - lo)) * (Hh - pad.t - pad.b);
+  for (const tv of niceTicks(lo * cap, hi * cap, 4)){
+    const yy = y(tv / cap);
+    svg.append(sv("line", {class:"grid", x1:pad.l, x2:W - pad.r, y1:yy, y2:yy}), sv("text", {x:pad.l - 6, y:yy + 4, "text-anchor":"end", text: usdT(tv)}));
+  }
+  const days = tradingDays(M.lastDate, H);
+  const steps = H === 5 ? [1,2,3,4,5] : H === 21 ? [5,10,15,20] : [10,21,42,63];
+  for (const d of steps){ if (d > H) continue; const dd = days[d - 1]; svg.append(sv("text", {x:x(d), y:Hh - 6, "text-anchor": d === H ? "end" : "middle", text: MONTHS[+dd.slice(5,7) - 1] + " " + (+dd.slice(8))})); }
+  svg.append(sv("text", {x:x(0), y:Hh - 6, "text-anchor":"start", text:"Now"}));
+  const line = k => bands.map((s, d) => x(d).toFixed(1) + "," + y(s[k]).toFixed(1));
+  const area = (a, b) => "M" + line(a).join("L") + "L" + line(b).reverse().join("L") + "Z";
+  svg.append(sv("path", {class:"b90", d: area("p95", "p5")}), sv("path", {class:"b50", d: area("p75", "p25")}));
+  svg.append(sv("path", {class:"med", d: "M" + line("p50").join("L")}));
+  if (pre !== 1){
+    const yr = y(pre);
+    svg.append(sv("line", {class:"ref", x1:pad.l, x2:W - pad.r, y1:yr, y2:yr}), sv("text", {class:"refl", x:W - pad.r, y:yr - 5, "text-anchor":"end", text:`Before ${weekday(M.yesterday.date)}'s drop`}));
+  }
+  const cross = sv("line", {class:"cross", y1:pad.t, y2:Hh - pad.b, x1:-10, x2:-10}); svg.append(cross);
+  const tip = $("ftip");
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const d = Math.max(0, Math.min(H, Math.round(((px / r.width) * W - pad.l) / (W - pad.l - pad.r) * H)));
+    const b = bands[d]; cross.setAttribute("x1", x(d)); cross.setAttribute("x2", x(d));
+    tip.hidden = false; tip.textContent = "";
+    tip.append(el("div", {style:"font-weight:700", text: d === 0 ? "Now" : dateShort(days[d - 1])}),
+      el("div", {text: "Most likely " + usdT(b.p50 * cap) + " (" + pct((b.p50 - 1) * 100) + ")"}),
+      el("div", {text: "9 in 10: " + usdT(b.p5 * cap) + " to " + usdT(b.p95 * cap)}));
+    const card = svg.parentElement.getBoundingClientRect();
+    let lx = r.left - card.left + (x(d) / W) * r.width + 10; if (lx + tip.offsetWidth > card.width - 8) lx -= tip.offsetWidth + 20;
+    tip.style.left = Math.max(6, lx) + "px"; tip.style.top = (r.top - card.top + 10) + "px";
+  };
+  svg.onmousemove = move; svg.ontouchmove = move; svg.ontouchstart = move;
+  svg.onmouseleave = () => { tip.hidden = true; cross.setAttribute("x1", -10); cross.setAttribute("x2", -10); };
+  $("fanSub").textContent = `Next ${H === 5 ? "week" : H === 21 ? "month" : "3 months"} of trading days across 10,000 simulated futures. Hover or drag for numbers.`;
+}
+
+/* company rows */
+function renderRows(R){
+  const M = state.model, h = R.byH[state.H], ul = $("rows"); ul.textContent = "";
+  const shockA = R.shock && R.shock.kind === "asset" ? R.shock.a : -1;
+  const list = h.assets.slice().sort((a, b) => a.p50 - b.p50);
+  const ext = Math.max(10, ...list.map(a => Math.max(Math.abs(a.p5), Math.abs(a.p95))));
+  const X = v => 50 + (Math.max(-ext, Math.min(ext, v)) / ext) * 50;
+  for (const a of list){
+    const m = M.assets[a.i], left = X(a.p5), right = X(a.p95), mid = X(a.p50);
+    ul.append(el("li", {class:"row"}, [
+      el("div", null, [
+        el("div", {class:"nm"}, [m.name, a.i === shockA ? el("span", {class:"tag", text:"shocked"}) : null]),
+        el("div", {class:"sub", text: `${pct(a.p5, 0)} to ${pct(a.p95, 0)} · ${Math.round(a.up * 100)}% up`})
+      ]),
+      el("div", {class:"range", "aria-hidden":"true"}, [
+        el("div", {class:"r", style:`left:${left}%;width:${Math.max(1, right - left)}%`}),
+        el("div", {class:"m", style:`left:calc(${mid}% - 1.5px);background:var(--${a.p50 < 0 ? "loss" : "gain"})`})
+      ]),
+      el("div", {class:"pct " + dir(a.p50), text: pct(a.p50)})
+    ]));
+  }
+  $("spreadLead").textContent = `Each company's most likely move ${HEND[state.H]}. The gray bar runs from the bad case to the good case (1 in 20 each way).`;
+}
+
+/* what history says */
+function lenses(M){
+  const st = M.study, out = [];
+  if (st.similar && st.similar.n >= 5) out.push({who:"Today's AI leaders", note:`${st.similar.n} drops of 3.5–5.5%`, S:st.similar});
+  if (st.cluster && st.cluster.n >= 5) out.push({who:"Drops in a cluster", note:`${st.cluster.n} times a 3% drop came within a week of another`, S:st.cluster});
+  if (st.ndx3 && st.ndx3.n >= 5) out.push({who:"Nasdaq-100", note:`${st.ndx3.n} drops of 3%+, less hindsight bias`, S:st.ndx3});
+  return out;
+}
+function renderHistory(){
+  $("histLead").textContent = "Three ways to look at what followed similar days since 2012. Today's AI leaders look best partly because they're the winners we know about now, so the Nasdaq-100 is the fairer check.";
+  renderLens();
+  renderHistList();
+}
+function renderLens(){
+  const M = state.model; if (!M) return;
+  const box = $("lens"); box.textContent = "";
+  box.append(el("div", {class:"lrow head"}, [el("span", {text:"A month later"}), el("span", {class:"v", text:"Higher"}), el("span", {class:"v", text:"Typical"}), el("span", {class:"v", text:"Back to old level"})]));
+  const base = state.res["base"];
+  if (base){
+    const h = base.byH[21];
+    box.append(el("div", {class:"lrow sim"}, [
+      el("span", {class:"who"}, ["This simulation", el("small", {text:"10,000 futures from today, no new shock"})]),
+      el("span", {class:"v " + (h.up >= 0.5 ? "up" : "down"), text: share(h.up)}),
+      el("span", {class:"v " + dir((h.b.p50 - 1) * 100), text: pct((h.b.p50 - 1) * 100)}),
+      el("span", {class:"v", text: share(h.back)})
+    ]));
+  }
+  for (const L of lenses(M)){
+    const S = L.S;
+    box.append(el("div", {class:"lrow"}, [
+      el("span", {class:"who"}, [L.who, el("small", {text: L.note})]),
+      el("span", {class:"v " + (S.d21 && S.d21.up >= 0.5 ? "up" : "down"), text: share(S.d21 && S.d21.up)}),
+      el("span", {class:"v " + dir(S.d21 && S.d21.med), text: pct(S.d21 && S.d21.med)}),
+      el("span", {class:"v", text: share(S.rec21)})
+    ]));
+  }
+}
+function renderHistList(){
+  const M = state.model, ul = $("hist"); ul.textContent = "";
+  const eps = M.events.filter(e => e.first && e.date !== M.lastDate);
+  const shown = state.histAll ? eps : eps.filter(e => e.label || e.pct <= -3.5).slice(0, 12);
+  ul.append(el("li", {class:"hrow head"}, [el("span", {text:"AI group's big drops"}), el("span", {class:"c", text:"Drop"}), el("span", {class:"c", text:"Week"}), el("span", {class:"c", text:"Month"})]));
+  for (const e of shown){
+    ul.append(el("li", {class:"hrow"}, [
+      el("span", {class:"d"}, [dateShort(e.date), e.label ? el("span", {class:"l", text: e.label}) : null]),
+      el("span", {class:"c down", text: pct(e.pct)}),
+      el("span", {class:"c " + dir(e.d5), text: e.d5 == null ? "…" : pct(e.d5)}),
+      el("span", {class:"c " + dir(e.d21), text: e.d21 == null ? "…" : pct(e.d21)})
+    ]));
+  }
+  const more = $("histMore");
+  more.textContent = state.histAll ? "Show fewer" : `Show all ${eps.length} past drops`;
+  more.onclick = () => { state.histAll = !state.histAll; renderHistList(); };
+}
+
+/* trust */
+function renderTrust(){
+  const M = state.model, c = M.calib || {};
+  const s = $("score"); s.textContent = "";
+  const fact = (v, t) => el("div", {class:"fact"}, [el("b", {text: v}), el("span", {text: t})]);
+  if (c.afterDrops) s.append(fact(share(c.afterDrops.in90), `of ${c.afterDrops.n} months right after big drops landed inside the model's 9-in-10 range. 90% is the target.`));
+  if (c.monthly) s.append(fact(share(c.monthly.in90), `of ${c.monthly.n} ordinary months since ${new Date(c.since).getUTCFullYear()} did.${c.monthly.above > c.monthly.below * 1.5 ? " Most misses were rallies bigger than the model expected." : ""}`));
+  const ul = $("trustList"); ul.textContent = "";
+  const items = [
+    "It knows how jumpy each stock is right now, that big drops tend to come in clusters, that drops hit harder than rallies, and how these companies have moved together on real days since 2012.",
+    "It doesn't know the news. It can't predict an earnings miss, a Fed decision or a deal falling apart. Use the shock buttons to test those.",
+    `It assumes these companies grow about ${Math.round((M.driftYear || 0.08) * 100)}% a year on average, scaled by how much each one swings with the group. That's why it misses big rallies more often than big drops: it doesn't assume the AI boom keeps going.`,
+    "Only public US-listed companies are simulated. OpenAI, Anthropic and the other private companies aren't, and SoftBank (Tokyo) is left out.",
+    "The group is weighted by each company's value today. Newer stocks like CoreWeave and SpaceX lean on how they've moved with the group. The dates skip weekends but not holidays."
+  ];
+  for (const t of items) ul.append(el("li", {text: t}));
+}
+
+/* controls */
+$("horizon").addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  state.H = +b.getAttribute("data-h");
+  for (const x of $("horizon").querySelectorAll("button")) x.setAttribute("aria-pressed", x === b ? "true" : "false");
+  const R = state.res[cacheKey()]; if (R) render(R);
+});
+let cT = null;
+$("cSize").addEventListener("input", ev => {
+  state.custom.size = +ev.target.value / 100; $("cVal").textContent = pct(+ev.target.value, 0);
+  clearTimeout(cT); cT = setTimeout(run, 250);
+});
+$("cAsset").addEventListener("change", ev => { state.custom.asset = ev.target.value; run(); });
+let rz = null;
+window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { const R = state.res[cacheKey()]; if (R) drawFan(R); }, 150); });
+
+/* boot */
+fetch("data/model.json?t=" + Date.now(), {cache:"no-store"}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(M => {
+  state.model = M;
+  prepare(M);
+  const sel = $("cAsset"); for (const a of M.assets) sel.append(el("option", {value:a.id, text:a.name}));
+  sel.value = state.custom.asset;
+  renderHero(M); renderScenarios(); renderHistory(); renderTrust();
+  run();
+}).catch(() => {
+  $("heroQ").textContent = "The simulation model isn't available yet. It's rebuilt each weekday after the market closes.";
+  $("stamp").textContent = "";
+});
+})();
+</script>
+</body>
+</html>

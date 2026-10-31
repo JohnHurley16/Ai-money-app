@@ -9,8 +9,11 @@ It runs entirely on GitHub:
 | Website | GitHub Pages serves `index.html` and the files in `data/` | Always |
 | Prices and market values | `scripts/update-prices.mjs` reads Yahoo Finance quotes. No key needed. | Every 15 min, 9 AM to 5:45 PM ET on weekdays |
 | News, new deals, valuations | `scripts/ai-refresh.mjs` asks Claude (Claude API + web search) what changed | About 8:40 AM, 12:40, 2:40 and 4:40 PM ET on weekdays |
+| Simulation model | `scripts/build-model.mjs` fits volatility models to price history since 2012 | About 5:25 PM ET on weekdays |
 
-The page checks for new data every minute while it's open. Both jobs live in `.github/workflows/update.yml`, which commits the new data and redeploys the site.
+The page checks for new data every minute while it's open.
+
+A second page, **What's next** (`sim.html`), runs a Monte Carlo simulation in your browser: 10,000 futures for the public AI companies on the map, built by replaying real trading days since 2012 (filtered historical simulation with a GJR-GARCH volatility model per stock), with buttons to test shocks. `scripts/build-model.mjs` rebuilds its model (`data/model.json`) each weekday after the close, from daily prices cached in `model-src/`. Both jobs live in `.github/workflows/update.yml`, which commits the new data and redeploys the site.
 
 ## Setup
 
