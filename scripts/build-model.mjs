@@ -134,9 +134,11 @@ const ndx = cache["^NDX"] || {};
 const dates = Object.keys(ndx).sort().filter(d => d >= `${START_YEAR}-01-01`);
 if (dates.length < 1000) { warn(`Only ${dates.length} Nasdaq-100 days; model not built.`); process.exit(0); }
 const T = dates.length - 1; // number of return days
-const retOf = closes => { const out = new Array(T).fill(null); for (let t = 1; t <= T; t++){ const a = closes?.[dates[t - 1]], b = closes?.[dates[t]]; if (a && b) out[t - 1] = Math.log(b / a); } return out; };
+// companies whose older price history belongs to a different business
+const SINCE = {NBIS: "2024-10-21"};
+const retOf = (closes, from) => { const out = new Array(T).fill(null); for (let t = 1; t <= T; t++){ if (from && dates[t - 1] < from) continue; const a = closes?.[dates[t - 1]], b = closes?.[dates[t]]; if (a && b) out[t - 1] = Math.log(b / a); } return out; };
 
-const assets = assetsIn.map(p => ({id: p.id, name: p.name, sym: p.ticker, value: p.value, ret: retOf(cache[p.ticker])}))
+const assets = assetsIn.map(p => ({id: p.id, name: p.name, sym: p.ticker, value: p.value, ret: retOf(cache[p.ticker], SINCE[p.ticker])}))
   .filter(a => a.ret.filter(x => x != null).length >= 40);
 const ndxRet = retOf(ndx);
 
@@ -186,21 +188,25 @@ const LABELS = {
   "2020-09-03": "Tech pullback", "2022-09-13": "Hot inflation report", "2024-08-05": "Yen carry-trade unwind",
   "2025-01-27": "DeepSeek shock", "2025-04-03": "Tariff shock", "2025-04-04": "Tariff shock"
 };
-const cumFwd = (t, h) => { let s = 0; for (let k = 1; k <= h; k++){ const r = basketRet[t + k]; if (r == null) return null; s += r; } return (Math.exp(s) - 1) * 100; };
-// after an event, did the basket get back to where it was the day before the drop?
-const recovered = (t, h) => { let s = 0; for (let k = 1; k <= h; k++){ const r = basketRet[t + k]; if (r == null) return null; s += r; if (s >= -basketRet[t]) return true; } return false; };
-const events = [];
-let lastEvent = -99;
-for (let t = 0; t < T; t++){
-  const r = basketRet[t]; if (r == null) continue;
-  const pct = (Math.exp(r) - 1) * 100;
-  if (pct > -3) continue;
-  const first = t - lastEvent > 5; // first big drop in a week = new episode
-  lastEvent = t;
-  events.push({date: dates[t + 1], pct: r4(pct), z: r4(mB.z[t]), first, ndx: ndxRet[t] != null ? r4((Math.exp(ndxRet[t]) - 1) * 100) : null,
-    d1: r4(cumFwd(t, 1)), d5: r4(cumFwd(t, 5)), d21: r4(cumFwd(t, 21)), d63: r4(cumFwd(t, 63)),
-    rec5: recovered(t, 5), rec21: recovered(t, 21), rec63: recovered(t, 63), label: LABELS[dates[t + 1]] || null});
+function eventsOf(series, thresholdPct, zs){
+  const cumFwd = (t, h) => { let s = 0; for (let k = 1; k <= h; k++){ const r = series[t + k]; if (r == null) return null; s += r; } return (Math.exp(s) - 1) * 100; };
+  // after a drop, did the series get back to where it was the day before?
+  const recovered = (t, h) => { let s = 0; for (let k = 1; k <= h; k++){ const r = series[t + k]; if (r == null) return null; s += r; if (s >= -series[t]) return true; } return false; };
+  const out = []; let lastEvent = -99;
+  for (let t = 0; t < T; t++){
+    const r = series[t]; if (r == null) continue;
+    const pct = (Math.exp(r) - 1) * 100;
+    if (pct > thresholdPct) continue;
+    const first = t - lastEvent > 5; // first big drop in a week starts a new episode
+    lastEvent = t;
+    out.push({date: dates[t + 1], pct: r4(pct), z: r4(zs[t]), first, ndx: ndxRet[t] != null ? r4((Math.exp(ndxRet[t]) - 1) * 100) : null,
+      d1: r4(cumFwd(t, 1)), d5: r4(cumFwd(t, 5)), d21: r4(cumFwd(t, 21)), d63: r4(cumFwd(t, 63)),
+      rec5: recovered(t, 5), rec21: recovered(t, 21), rec63: recovered(t, 63), label: LABELS[dates[t + 1]] || null});
+  }
+  return out;
 }
+const events = eventsOf(basketRet, -3, mB.z);
+const ndxEvents = eventsOf(ndxRet, -3, mN.z);
 function summarize(list){
   const out = {n: list.length};
   for (const h of ["d1", "d5", "d21", "d63"]){
@@ -211,7 +217,12 @@ function summarize(list){
   return out;
 }
 const episodes = events.filter(e => e.first && e.date !== lastDate);
+const ndxEpisodes = ndxEvents.filter(e => e.first && e.date !== lastDate);
 const study = {
+  // the Nasdaq-100 changes members over time, so it isn't only today's winners (less hindsight bias)
+  ndx3: summarize(ndxEpisodes),
+  // follow-on drops: a 3%+ drop within a week of another one, like Friday after Thursday
+  cluster: summarize(events.filter(e => !e.first && e.date !== lastDate)),
   drop3: summarize(episodes),
   drop4: summarize(episodes.filter(e => e.pct <= -4)),
   // closest analogs in size to a ~4% day
@@ -220,7 +231,7 @@ const study = {
 
 /* ---------- calibration backtest (basket, 1 month) ---------- */
 function backtest(starts, H = 21, N = 2000){
-  let in90 = 0, in50 = 0, n = 0;
+  let in90 = 0, in50 = 0, n = 0, above = 0, below = 0;
   const g = mB.fit; if (!g) return null;
   const zs = mB.z;
   for (const t0 of starts){
@@ -238,11 +249,11 @@ function backtest(starts, H = 21, N = 2000){
     }
     sims.sort();
     const q = x => sims[Math.min(N - 1, Math.max(0, Math.round(x * (N - 1))))];
-    if (realized >= q(0.05) && realized <= q(0.95)) in90++;
+    if (realized >= q(0.05) && realized <= q(0.95)) in90++; else if (realized > q(0.95)) above++; else below++;
     if (realized >= q(0.25) && realized <= q(0.75)) in50++;
     n++;
   }
-  return n ? {n, in90: r4(in90 / n), in50: r4(in50 / n)} : null;
+  return n ? {n, in90: r4(in90 / n), in50: r4(in50 / n), above: r4(above / n), below: r4(below / n)} : null;
 }
 const monthStarts = []; for (let t = 750; t < T - 21; t += 21) monthStarts.push(t);
 const shockStarts = events.filter(e => e.first).map(e => dates.indexOf(e.date) - 1).filter(t => t > 750);
