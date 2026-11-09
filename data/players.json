@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-09T22:40:21.199Z",
+ "asOf": "2026-11-09T22:50:44.136Z",
  "items": [
   {
    "id": "nvda",
@@ -279,7 +279,7 @@
    "name": "SoftBank Group",
    "ticker": "9984.T",
    "public": true,
-   "value": 122700050926,
+   "value": 122723364635,
    "valueLabel": "$123B",
    "valueKind": "market cap",
    "valueDate": "2026-11-09",
