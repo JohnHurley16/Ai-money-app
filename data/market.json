@@ -1,8 +1,8 @@
 {
- "asOf": "2026-11-17T04:00:38.897Z",
- "nasdaq1d": -2.49,
- "nasdaqMonth": -3.65,
- "sp1d": -1.92,
+ "asOf": "2026-11-17T21:17:10.966Z",
+ "nasdaq1d": -0.74,
+ "nasdaqMonth": -4.36,
+ "sp1d": -1.03,
  "headline": "Nasdaq's worst day since June as AI spending fears bite",
  "sources": [
   "https://finance.yahoo.com/markets/live/stock-market-today-friday-october-30-dow-sp-500-nasdaq-amazon-intel-131609630.html",
@@ -11,97 +11,97 @@
  ],
  "refs": {
   "NVDA": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 162.85,
    "month": 204.64,
    "year": 186.5
   },
   "AMD": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 534.06,
    "month": 504.8,
    "year": 214.16
   },
   "AVGO": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 347.01,
    "month": 326.08,
    "year": 346.1
   },
   "INTC": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 59.66,
    "month": 65.76,
    "year": 36.9
   },
   "TSM": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 398.73,
    "month": 406.13,
    "year": 303.89
   },
   "MU": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 778.31,
    "month": 884.74,
    "year": 285.41
   },
   "MSFT": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 523.88,
    "month": 521.91,
    "year": 483.62
   },
   "GOOGL": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 295.77,
    "month": 279.84,
    "year": 313
   },
   "AMZN": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 266.66,
    "month": 240.35,
    "year": 230.82
   },
   "META": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 641.69,
    "month": 614.99,
    "year": 660.09
   },
   "ORCL": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 125.35,
    "month": 130.67,
    "year": 194.91
   },
   "CRWV": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 53.13,
    "month": 54.87,
    "year": 71.61
   },
   "NBIS": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 115.88,
    "month": 154.14,
    "year": 83.705
   },
   "9984.T": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 3547,
    "month": 4481,
    "year": 4400
   },
   "SPCX": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 136.25,
    "month": 136.0277,
    "year": null
   },
   "^IXIC": {
-   "day": "2026-11-16",
+   "day": "2026-11-17",
    "week": 25136.273,
    "month": 25436.999,
    "year": 23241.991
