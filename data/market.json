@@ -1,8 +1,8 @@
 {
- "asOf": "2026-11-21T02:35:28.337Z",
- "nasdaq1d": -5.28,
- "nasdaqMonth": -11.08,
- "sp1d": -3.7,
+ "asOf": "2026-11-24T00:18:52.690Z",
+ "nasdaq1d": 6.51,
+ "nasdaqMonth": -5.3,
+ "sp1d": 4.73,
  "headline": "Nasdaq's worst day since June as AI spending fears bite",
  "sources": [
   "https://finance.yahoo.com/markets/live/stock-market-today-friday-october-30-dow-sp-500-nasdaq-amazon-intel-131609630.html",
@@ -29,44 +29,44 @@
    "year": 346.1
   },
   "INTC": {
-   "day": "2026-11-20",
-   "week": 59.66,
+   "day": "2026-11-23",
+   "week": 51.28,
    "month": 65.76,
    "year": 36.9
   },
   "TSM": {
-   "day": "2026-11-20",
-   "week": 398.73,
+   "day": "2026-11-23",
+   "week": 318.71,
    "month": 406.13,
    "year": 303.89
   },
   "MU": {
-   "day": "2026-11-20",
-   "week": 778.31,
+   "day": "2026-11-23",
+   "week": 594.51,
    "month": 884.74,
    "year": 285.41
   },
   "MSFT": {
-   "day": "2026-11-20",
-   "week": 523.88,
+   "day": "2026-11-23",
+   "week": 484.52,
    "month": 521.91,
    "year": 483.62
   },
   "GOOGL": {
-   "day": "2026-11-20",
-   "week": 295.77,
+   "day": "2026-11-23",
+   "week": 265.29,
    "month": 279.84,
    "year": 313
   },
   "AMZN": {
-   "day": "2026-11-20",
-   "week": 266.66,
+   "day": "2026-11-23",
+   "week": 246.82,
    "month": 240.35,
    "year": 230.82
   },
   "META": {
-   "day": "2026-11-20",
-   "week": 641.69,
+   "day": "2026-11-23",
+   "week": 560.84,
    "month": 614.99,
    "year": 660.09
   },
@@ -83,8 +83,8 @@
    "year": 71.61
   },
   "NBIS": {
-   "day": "2026-11-20",
-   "week": 115.88,
+   "day": "2026-11-23",
+   "week": 81.31,
    "month": 154.14,
    "year": 83.705
   },
@@ -101,8 +101,8 @@
    "year": null
   },
   "^IXIC": {
-   "day": "2026-11-20",
-   "week": 25136.273,
+   "day": "2026-11-23",
+   "week": 22617.733,
    "month": 25436.999,
    "year": 23241.991
   }
